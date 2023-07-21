@@ -7,17 +7,14 @@ class HabiticaBaseClient:
         self.api_key = api_key
         self.base_url = base_url
 
-    def make_request(self, method: str, url: str, **kwargs) -> Dict:
-        if 'json' in kwargs:
-            kwargs['json'] = self.clean_json_input(kwargs['json'])
-        headers = {
-            'x-api-user': self.api_user,
-            'x-api-key': self.api_key,
-            'Content-Type': 'application/json'
-        }
-        response = requests.request(method, self.base_url + url, headers=headers, **kwargs)
+    def make_request(self, method: str, endpoint: str, **kwargs) -> Dict:
+        url = f"{self.base_url}{endpoint}"
+        headers = {'x-api-user': self.api_user, 'x-api-key': self.api_key}
+
+        response = requests.request(method, url, headers=headers)
+
         response.raise_for_status()
-        return response.json()
+        return response.json()['data']
 
     def bug_report(self, text: str) -> Dict:
         return self.make_request('POST', '/user/messages', json={"text": text})
