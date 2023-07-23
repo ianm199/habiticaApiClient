@@ -24,14 +24,14 @@ class HabiticaBaseClient:
             if params:
                 extra_args["params"] = params
             if data:
-                extra_args["data"] = data
+                extra_args["data"] = request_data
             response = requests.request(method, url, headers=headers, **extra_args)
 
         response.raise_for_status()
         return response.json()['data']
 
     def bug_report(self, text: str) -> Dict:
-        return self.make_request('POST', '/user/messages', json={"text": text})
+        return self.make_request('POST', '/user/messages', data={"text": text})
 
     def status(self) -> Dict:
         return self.make_request('GET', '/status')

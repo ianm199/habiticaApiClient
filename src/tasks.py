@@ -228,7 +228,7 @@ class HabiticaTaskClient(HabiticaBaseClient):
             "text": text,
             "completed": completed
         }
-        return self.make_request('PUT', f'/tasks/{task_id}/checklist/{item_id}', body=body)
+        return self.make_request('PUT', f'/tasks/{task_id}/checklist/{item_id}', data=body)
 
 
 
