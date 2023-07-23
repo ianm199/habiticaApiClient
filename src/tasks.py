@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Union
 from src.client import HabiticaBaseClient
 
 
@@ -16,7 +16,7 @@ class HabiticaTaskClient(HabiticaBaseClient):
         return self.make_request('POST', f'/tasks/{task_id}/tags/{tag_id}')
 
     def add_checklist_item(self, task_id: str, text: str, completed: bool = False) -> Dict:
-        return self.make_request('POST', f'/tasks/{task_id}/checklist', json={"text": text, "completed": completed})
+        return self.make_request('POST', f'/tasks/{task_id}/checklist', data={"text": text, "completed": completed})
 
     def create_challenge_task(self,
                               challenge_id: str,
@@ -59,7 +59,7 @@ class HabiticaTaskClient(HabiticaBaseClient):
             "down": down,
             "value": value
         }
-        return self.make_request('POST', f'/tasks/challenge/{challenge_id}', json=task_details)
+        return self.make_request('POST', f'/tasks/challenge/{challenge_id}', data=task_details)
 
     def create_group_task(self,
                           group_id: str,
@@ -102,7 +102,55 @@ class HabiticaTaskClient(HabiticaBaseClient):
             "down": down,
             "value": value
         }
-        return self.make_request('POST', f'/tasks/group/{group_id}', json=task_details)
+        return self.make_request('POST', f'/tasks/group/{group_id}', data=task_details)
+
+    def create_user_task(self,
+                         text: str,
+                         task_type: str,
+                         tags: Optional[List[str]] = None,
+                         alias: Optional[str] = None,
+                         attribute: Optional[str] = None,
+                         checklist: Optional[List[Dict[str, Union[str, bool]]]] = None,
+                         collapse_checklist: Optional[bool] = None,
+                         notes: Optional[str] = None,
+                         date: Optional[str] = None,
+                         priority: Optional[float] = None,
+                         reminders: Optional[List[str]] = None,
+                         frequency: Optional[str] = None,
+                         repeat: Optional[str] = None,
+                         every_x: Optional[int] = None,
+                         streak: Optional[int] = None,
+                         days_of_month: Optional[List[int]] = None,
+                         weeks_of_month: Optional[List[int]] = None,
+                         start_date: Optional[str] = None,
+                         up: Optional[bool] = None,
+                         down: Optional[bool] = None,
+                         value: Optional[float] = None) -> Dict:
+        """Create a new task belonging to the user"""
+        task_details = {
+            "text": text,
+            "type": task_type,
+            "tags": tags,
+            "alias": alias,
+            "attribute": attribute,
+            "checklist": checklist,
+            "collapseChecklist": collapse_checklist,
+            "notes": notes,
+            "date": date,
+            "priority": priority,
+            "reminders": reminders,
+            "frequency": frequency,
+            "repeat": repeat,
+            "everyX": every_x,
+            "streak": streak,
+            "daysOfMonth": days_of_month,
+            "weeksOfMonth": weeks_of_month,
+            "startDate": start_date,
+            "up": up,
+            "down": down,
+            "value": value
+        }
+        return self.make_request('POST', '/tasks/user', data=task_details)
 
     def delete_task(self, task_id: str) -> Dict:
         """Deletes a task from the user's task list."""
@@ -147,7 +195,7 @@ class HabiticaTaskClient(HabiticaBaseClient):
             "down": down,
             "value": value
         }
-        return self.make_request('PUT', f'/tasks/{task_id}', json=task_details)
+        return self.make_request('PUT', f'/tasks/{task_id}', data=task_details)
 
     def score_task(self, task_id: str, direction: str) -> Dict:
         """Scores a task."""
