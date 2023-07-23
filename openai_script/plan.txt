@@ -1,0 +1,2 @@
+In my next working session I will work on a script to programmatically go through this file and create the necessary
+files

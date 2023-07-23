@@ -26,8 +26,12 @@ class HabiticaBaseClient:
             if data:
                 extra_args["data"] = request_data
             response = requests.request(method, url, headers=headers, **extra_args)
-
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            print(f"Response Json:")
+            print(response.json())
+            raise e
         return response.json()['data']
 
     def bug_report(self, text: str) -> Dict:

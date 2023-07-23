@@ -1,0 +1,3170 @@
+./hall.js-} from '../../libs/items/utils';
+./hall.js-
+./hall.js-const api = {};
+./hall.js-
+./hall.js-/**
+./hall.js: * @api {get} /api/v3/hall/patrons Get all patrons
+./hall.js: * @apiDescription Returns an array of objects containing the patrons who backed Habitica's
+./hall.js- * original kickstarter. The array is sorted by the backer tier in descending order.
+./hall.js- * By default, only the first 50 patrons are returned. More can be accessed by passing ?page=n
+./hall.js: * @apiName GetPatrons
+./hall.js- * @apiGroup Hall
+./hall.js- *
+./hall.js: * @apiParam (Query) {Number} [page=0] The result page.
+./hall.js- * @apiSuccess {Array} data An array of patrons
+./hall.js- *
+./hall.js- * @apiSuccessExample {json} Example response
+./hall.js- * {
+./hall.js- *   "success": true,
+--
+./hall.js-    res.respond(200, patrons);
+./hall.js-  },
+./hall.js-};
+./hall.js-
+./hall.js-/**
+./hall.js: * @api {get} /api/v3/hall/heroes Get all Heroes (contributors)
+./hall.js: * @apiName GetHeroes
+./hall.js- * @apiGroup Hall
+./hall.js- *
+./hall.js: * @apiDescription Returns an array of objects containing the heroes who have
+./hall.js- * contributed for Habitica. The array is sorted by the contribution level in descending order.
+./hall.js- *
+./hall.js- * @apiSuccess {Array} heroes An array of heroes
+./hall.js- *
+./hall.js- * @apiSuccessExample {json} Example response:
+--
+./hall.js-
+./hall.js-const heroPartyAdminFields = 'balance challengeCount leader leaderOnly memberCount purchased quest';
+./hall.js-// must never include Party name, description, summary, leaderMessage
+./hall.js-
+./hall.js-/**
+./hall.js: * @api {get} /api/v3/hall/heroes/:heroId Get any user ("hero") given the UUID or Username
+./hall.js: * @apiParam (Path) {UUID} heroId user ID
+./hall.js: * @apiName GetHero
+./hall.js- * @apiGroup Hall
+./hall.js- * @apiPermission Admin
+./hall.js- *
+./hall.js: * @apiDescription Returns various data about the user. User does not need to be a contributor.
+./hall.js- *
+./hall.js- * @apiSuccess {Object} data The user object
+./hall.js- *
+./hall.js- * @apiUse NoAuthHeaders
+./hall.js- * @apiUse NoAccount
+--
+./hall.js-const gemsPerTier = {
+./hall.js-  1: 3, 2: 3, 3: 3, 4: 4, 5: 4, 6: 4, 7: 4, 8: 0, 9: 0,
+./hall.js-};
+./hall.js-
+./hall.js-/**
+./hall.js: * @api {put} /api/v3/hall/heroes/:heroId Update any user ("hero")
+./hall.js: * @apiParam (Path) {UUID} heroId User ID
+./hall.js: * @apiName UpdateHero
+./hall.js- * @apiGroup Hall
+./hall.js- * @apiPermission Admin
+./hall.js- *
+./hall.js: * @apiDescription Update various details in the user's User document,
+./hall.js- * including but not limited to privileges, gems, contributions, items.
+./hall.js- *
+./hall.js- * @apiExample Example Body:
+./hall.js- * {
+./hall.js- *    "balance": 1000,
+--
+./hall.js-    res.respond(200, responseHero);
+./hall.js-  },
+./hall.js-};
+./hall.js-
+./hall.js-/**
+./hall.js: * @api {get} /api/v3/hall/heroes/party/:groupId Get any Party given its ID
+./hall.js: * @apiParam (Path) {UUID} groupId party's group ID
+./hall.js: * @apiName GetHeroParty
+./hall.js- * @apiGroup Hall
+./hall.js- * @apiPermission userSupport
+./hall.js- *
+./hall.js: * @apiDescription Returns some basic information about a given Party,
+./hall.js- * to assist admins with user support.
+./hall.js- *
+./hall.js- * @apiSuccess {Object} data The party object (contains computed fields
+./hall.js- * that are not in the Group model)
+./hall.js- *
+--
+./coupon.js- * @apiDefine Sudo Sudo Users
+./coupon.js- * Moderators with all access permissions.
+./coupon.js- */
+./coupon.js-
+./coupon.js-/**
+./coupon.js: * @api {get} /api/v3/coupons Get coupons
+./coupon.js: * @apiName GetCoupons
+./coupon.js- * @apiGroup Coupon
+./coupon.js- * @apiPermission sudo
+./coupon.js- *
+./coupon.js- * @apiSuccess {String} Coupons in CSV format
+./coupon.js- *
+--
+./coupon.js-    res.status(200).send(csv);
+./coupon.js-  },
+./coupon.js-};
+./coupon.js-
+./coupon.js-/**
+./coupon.js: * @api {post} /api/v3/coupons/generate/:event Generate coupons for an event
+./coupon.js: * @apiName GenerateCoupons
+./coupon.js- * @apiGroup Coupon
+./coupon.js- * @apiPermission sudo
+./coupon.js- *
+./coupon.js: * @apiParam (Path) {String=wondercon,google_6mo} event The event for which the coupon
+./coupon.js- *                                                      should be generated
+./coupon.js: * @apiParam (Query) {Number} count The number of coupon codes to generate
+./coupon.js- *
+./coupon.js- * @apiSuccess {Array} data Generated coupons
+./coupon.js- *
+./coupon.js- * @apiError (400) {BadRequest} CouponValidationError The request was missing the
+./coupon.js- *                                                    count query parameter or used
+--
+./coupon.js-};
+./coupon.js-
+./coupon.js-/* NOTE this route has also an API v4 version */
+./coupon.js-
+./coupon.js-/**
+./coupon.js: * @api {post} /api/v3/coupons/enter/:code Redeem a coupon code
+./coupon.js: * @apiName RedeemCouponCode
+./coupon.js- * @apiGroup Coupon
+./coupon.js- *
+./coupon.js: * @apiParam (Path) {String} code The coupon code to apply
+./coupon.js- *
+./coupon.js- * @apiSuccess {Object} data User object
+./coupon.js- */
+./coupon.js-api.enterCouponCode = {
+./coupon.js-  method: 'POST',
+--
+./coupon.js-    res.respond(200, userToJSON);
+./coupon.js-  },
+./coupon.js-};
+./coupon.js-
+./coupon.js-/**
+./coupon.js: * @api {post} /api/v3/coupons/validate/:code Validate a coupon code
+./coupon.js: * @apiName ValidateCoupon
+./coupon.js- * @apiGroup Coupon
+./coupon.js- *
+./coupon.js: * @apiParam (Path) {String} code The coupon code to validate
+./coupon.js- *
+./coupon.js- * @apiSuccess {Boolean} data.valid True or False
+./coupon.js- */
+./coupon.js-api.validateCoupon = {
+./coupon.js-  method: 'POST',
+--
+./quests.js- */
+./quests.js-
+./quests.js-const api = {};
+./quests.js-
+./quests.js-/**
+./quests.js: * @api {post} /api/v3/groups/:groupId/quests/invite/:questKey Invite users to a quest
+./quests.js: * @apiName InviteToQuest
+./quests.js- * @apiGroup Quest
+./quests.js- *
+./quests.js: * @apiParam (Path) {String} groupId The group _id (or 'party')
+./quests.js: * @apiParam (Path) {String} questKey
+./quests.js- *
+./quests.js- * @apiSuccess {Object} data Quest object
+./quests.js- *
+./quests.js- * @apiUse GroupNotFound
+./quests.js- * @apiUse QuestNotFound
+--
+./quests.js-    });
+./quests.js-  },
+./quests.js-};
+./quests.js-
+./quests.js-/**
+./quests.js: * @api {post} /api/v3/groups/:groupId/quests/accept Accept a pending quest
+./quests.js: * @apiName AcceptQuest
+./quests.js- * @apiGroup Quest
+./quests.js- *
+./quests.js: * @apiParam (Path) {String} groupId The group _id (or 'party')
+./quests.js- *
+./quests.js- * @apiSuccess {Object} data Quest Object
+./quests.js- *
+./quests.js- * @apiUse GroupNotFound
+./quests.js- * @apiUse QuestNotFound
+--
+./quests.js-    });
+./quests.js-  },
+./quests.js-};
+./quests.js-
+./quests.js-/**
+./quests.js: * @api {post} /api/v3/groups/:groupId/quests/reject Reject a quest
+./quests.js: * @apiName RejectQuest
+./quests.js- * @apiGroup Quest
+./quests.js- *
+./quests.js: * @apiParam (Path) {String} groupId The group _id (or 'party')
+./quests.js- *
+./quests.js- * @apiSuccess {Object} data Quest Object
+./quests.js- *
+./quests.js- * @apiUse GroupNotFound
+./quests.js- * @apiUse QuestNotFound
+--
+./quests.js-    });
+./quests.js-  },
+./quests.js-};
+./quests.js-
+./quests.js-/**
+./quests.js: * @api {post} /api/v3/groups/:groupId/quests/force-start Force-start a pending quest
+./quests.js: * @apiName ForceQuestStart
+./quests.js- * @apiGroup Quest
+./quests.js- *
+./quests.js: * @apiParam (Path) {String} groupId The group _id (or 'party')
+./quests.js- *
+./quests.js- * @apiSuccess {Object} data Quest Object
+./quests.js- *
+./quests.js- * @apiPermission QuestLeader
+./quests.js- * @apiPermission GroupLeader
+--
+./quests.js-    });
+./quests.js-  },
+./quests.js-};
+./quests.js-
+./quests.js-/**
+./quests.js: * @api {post} /api/v3/groups/:groupId/quests/cancel Cancel a quest that is not active
+./quests.js: * @apiName CancelQuest
+./quests.js- * @apiGroup Quest
+./quests.js- *
+./quests.js: * @apiParam (Path) {String} groupId The group _id (or 'party')
+./quests.js- *
+./quests.js- * @apiSuccess {Object} data Quest Object
+./quests.js- *
+./quests.js- * @apiPermission QuestLeader
+./quests.js- * @apiPermission GroupLeader
+--
+./quests.js-    res.respond(200, savedGroup.quest);
+./quests.js-  },
+./quests.js-};
+./quests.js-
+./quests.js-/**
+./quests.js: * @api {post} /api/v3/groups/:groupId/quests/abort Abort the current quest
+./quests.js: * @apiName AbortQuest
+./quests.js- * @apiGroup Quest
+./quests.js- *
+./quests.js: * @apiParam (Path) {String} groupId The group _id (or 'party')
+./quests.js- *
+./quests.js- * @apiSuccess {Object} data Quest Object
+./quests.js- *
+./quests.js- * @apiPermission QuestLeader
+./quests.js- * @apiPermission GroupLeader
+--
+./quests.js-    res.respond(200, groupSaved.quest);
+./quests.js-  },
+./quests.js-};
+./quests.js-
+./quests.js-/**
+./quests.js: * @api {post} /api/v3/groups/:groupId/quests/leave Leave the active quest
+./quests.js: * @apiName LeaveQuest
+./quests.js- * @apiGroup Quest
+./quests.js- *
+./quests.js: * @apiParam (Path) {String} groupId The group _id (or 'party')
+./quests.js- *
+./quests.js- * @apiSuccess {Object} data Quest Object
+./quests.js- *
+./quests.js- * @apiUse GroupNotFound
+./quests.js- * @apiUse QuestNotFound
+--
+./cron.js-import cron from '../../middlewares/cron';
+./cron.js-
+./cron.js-const api = {};
+./cron.js-
+./cron.js-/**
+./cron.js: * @api {post} /api/v3/cron Run cron
+./cron.js: * @apiName Cron
+./cron.js: * @apiDescription This causes cron to run. It assumes that the user has already been shown
+./cron.js- * the Record Yesterday's Activity ("Check off any Dailies you did yesterday") screen and
+./cron.js- * so it will immediately apply damage for incomplete due Dailies.
+./cron.js- * @apiGroup Cron
+./cron.js- *
+./cron.js- * @apiSuccess {Object} data An empty Object
+--
+./tasks/groups.js-types.push('completedTodos', '_allCompletedTodos');
+./tasks/groups.js-
+./tasks/groups.js-const api = {};
+./tasks/groups.js-
+./tasks/groups.js-/**
+./tasks/groups.js: * @api {post} /api/v3/tasks/group/:groupId Create a new task belonging to a group
+./tasks/groups.js: * @apiDescription Can be passed an object to create a single task or
+./tasks/groups.js- * an array of objects to create multiple tasks.
+./tasks/groups.js: * @apiName CreateGroupTasks
+./tasks/groups.js- * @apiGroup Task
+./tasks/groups.js- *
+./tasks/groups.js: * @apiParam (Path) {UUID} groupId The id of the group the new task(s) will belong to
+./tasks/groups.js- *
+./tasks/groups.js- * @apiSuccess data An object if a single task was created, otherwise an array of tasks
+./tasks/groups.js- */
+./tasks/groups.js-api.createGroupTasks = {
+./tasks/groups.js-  method: 'POST',
+--
+./tasks/groups.js-    });
+./tasks/groups.js-  },
+./tasks/groups.js-};
+./tasks/groups.js-
+./tasks/groups.js-/**
+./tasks/groups.js: * @api {get} /api/v3/tasks/group/:groupId Get a group's tasks
+./tasks/groups.js: * @apiName GetGroupTasks
+./tasks/groups.js- * @apiGroup Task
+./tasks/groups.js- *
+./tasks/groups.js: * @apiParam (Path) {UUID} groupId The id of the group from which to retrieve the tasks
+./tasks/groups.js: * @apiParam (Query) {string="habits","dailys","todos","rewards"} [type] Query parameter to
+./tasks/groups.js- *                                                                       return just a type of tasks
+./tasks/groups.js- *
+./tasks/groups.js- * @apiSuccess {Array} data An array of tasks
+./tasks/groups.js- */
+./tasks/groups.js-api.getGroupTasks = {
+--
+./tasks/groups.js-    res.respond(200, tasks);
+./tasks/groups.js-  },
+./tasks/groups.js-};
+./tasks/groups.js-
+./tasks/groups.js-/**
+./tasks/groups.js: * @api {post} /api/v3/group/:groupId/tasks/:taskId/move/to/:position
+./tasks/groups.js- * Move a group task to a specified position
+./tasks/groups.js: * @apiDescription Moves a group task to a specified position
+./tasks/groups.js- * @apiVersion 3.0.0
+./tasks/groups.js: * @apiName GroupMoveTask
+./tasks/groups.js- * @apiGroup Task
+./tasks/groups.js- *
+./tasks/groups.js: * @apiParam (Path) {String} taskId The task _id
+./tasks/groups.js: * @apiParam (Path) {Number} position Where to move the task.
+./tasks/groups.js- *                                    0 = top of the list ("push to top").
+./tasks/groups.js- *                                   -1 = bottom of the list ("push to bottom").
+./tasks/groups.js- *
+./tasks/groups.js- * @apiSuccess {Array} data The new tasks order (group.tasksOrder.{task.type}s)
+./tasks/groups.js- */
+--
+./tasks/groups.js-    res.respond(200, order);
+./tasks/groups.js-  },
+./tasks/groups.js-};
+./tasks/groups.js-
+./tasks/groups.js-/**
+./tasks/groups.js: * @api {post} /api/v3/tasks/:taskId/assign Assign a group task to a user or users
+./tasks/groups.js: * @apiDescription Assign users to a group task
+./tasks/groups.js: * @apiName AssignTask
+./tasks/groups.js- * @apiGroup Task
+./tasks/groups.js- *
+./tasks/groups.js: * @apiParam (Path) {UUID} taskId The id of the task that will be assigned
+./tasks/groups.js: * @apiParam (Body) {UUID[]} [assignedUserIds] Array of user IDs to be assigned to the task
+./tasks/groups.js- *
+./tasks/groups.js- * @apiSuccess data The assigned task
+./tasks/groups.js- */
+./tasks/groups.js-api.assignTask = {
+./tasks/groups.js-  method: 'POST',
+--
+./tasks/groups.js-    });
+./tasks/groups.js-  },
+./tasks/groups.js-};
+./tasks/groups.js-
+./tasks/groups.js-/**
+./tasks/groups.js: * @api {post} /api/v3/tasks/:taskId/unassign/:assignedUserId Unassign a user from a task
+./tasks/groups.js: * @apiDescription Unassigns a user from a group task
+./tasks/groups.js: * @apiName UnassignTask
+./tasks/groups.js- * @apiGroup Task
+./tasks/groups.js- *
+./tasks/groups.js: * @apiParam (Path) {UUID} taskId The id of the task that is the original group task
+./tasks/groups.js: * @apiParam (Path) {UUID} assignedUserId The id of the user that will be unassigned from the task
+./tasks/groups.js- *
+./tasks/groups.js- * @apiSuccess data The unassigned task
+./tasks/groups.js- */
+./tasks/groups.js-api.unassignTask = {
+./tasks/groups.js-  method: 'POST',
+--
+./tasks/groups.js-    res.respond(200, task);
+./tasks/groups.js-  },
+./tasks/groups.js-};
+./tasks/groups.js-
+./tasks/groups.js-/**
+./tasks/groups.js: * @api {post} /api/v3/tasks/:taskId/needs-work/:userId Require more work for a group task
+./tasks/groups.js: * @apiDescription Mark an assigned group task as needing more work before it can be approved
+./tasks/groups.js- * @apiVersion 3.0.0
+./tasks/groups.js: * @apiName TaskNeedsWork
+./tasks/groups.js- * @apiGroup Task
+./tasks/groups.js- *
+./tasks/groups.js: * @apiParam (Path) {UUID} taskId The id of the task that is the original group task
+./tasks/groups.js: * @apiParam (Path) {UUID} userId The id of the assigned user
+./tasks/groups.js- *
+./tasks/groups.js- * @apiSuccess task The task that needs more work
+./tasks/groups.js- */
+./tasks/groups.js-api.taskNeedsWork = {
+./tasks/groups.js-  method: 'POST',
+--
+./groups.js- */
+./groups.js-
+./groups.js-const api = {};
+./groups.js-
+./groups.js-/**
+./groups.js: * @api {post} /api/v3/groups Create group
+./groups.js: * @apiName CreateGroup
+./groups.js- * @apiGroup Group
+./groups.js- *
+./groups.js: * @apiParam (Body) {String} name
+./groups.js: * @apiParam (Body) {String="guild","party"} type Type of group (guild or party)
+./groups.js: * @apiParam (Body) {String="private","public"} privacy Privacy of group (party MUST be private)
+./groups.js- *
+./groups.js: * @apiParamExample {json} Private Guild:
+./groups.js- *     {
+./groups.js- *       "name": "The Best Guild",
+./groups.js- *       "type": "guild",
+./groups.js- *       "privacy": "private"
+./groups.js- *     }
+--
+./groups.js-    res.respond(201, response); // do not remove chat flags data as we've just created the group
+./groups.js-  },
+./groups.js-};
+./groups.js-
+./groups.js-/**
+./groups.js: * @api {post} /api/v3/groups/create-plan Create a Group and then redirect to the correct payment
+./groups.js: * @apiName CreateGroupPlan
+./groups.js- * @apiGroup Group
+./groups.js- *
+./groups.js- * @apiSuccess (201) {Object} data The created group
+./groups.js- */
+./groups.js-api.createGroupPlan = {
+--
+./groups.js-    }
+./groups.js-  },
+./groups.js-};
+./groups.js-
+./groups.js-/**
+./groups.js: * @api {get} /api/v3/groups Get groups for a user
+./groups.js: * @apiName GetGroups
+./groups.js- * @apiGroup Group
+./groups.js- *
+./groups.js: * @apiParam (Query) {String} type The type of groups to retrieve.
+./groups.js- *                                 Must be a query string representing a list of values
+./groups.js- *                                 like 'tavern,party'. Possible values are party, guilds,
+./groups.js- *                                 privateGuilds, publicGuilds, tavern.
+./groups.js: * @apiParam (Query) {String="true","false"} [paginate] Public guilds support pagination.
+./groups.js- *                                                      When true guilds are returned in
+./groups.js- *                                                      groups of 30.
+./groups.js: * @apiParam (Query) {Number} [page] When pagination is enabled for public guilds this
+./groups.js-                                     parameter can be used to specify the page number
+./groups.js-                                    (the initial page is number 0 and not required).
+./groups.js- *
+./groups.js: * @apiParamExample {json} Private Guilds, Tavern:
+./groups.js- *     {
+./groups.js- *       "type": "privateGuilds,tavern"
+./groups.js- *     }
+./groups.js- *
+./groups.js- * @apiError (400) {BadRequest} groupTypesRequired Group types are required
+--
+./groups.js-    res.respond(200, results);
+./groups.js-  },
+./groups.js-};
+./groups.js-
+./groups.js-/**
+./groups.js: * @api {get} /api/v3/groups/:groupId Get group
+./groups.js: * @apiName GetGroup
+./groups.js- * @apiGroup Group
+./groups.js- *
+./groups.js: * @apiParam (Path) {String} groupId The group _id ('party' for the user party
+./groups.js- *                                   and 'habitrpg' for tavern are accepted)
+./groups.js- *
+./groups.js: * @apiParamExample {String} Tavern:
+./groups.js- *     /api/v3/groups/habitrpg
+./groups.js- *
+./groups.js- * @apiSuccess {Object} data The group object (See <a href="https://github.com/HabitRPG/habitica/blob/develop/website/server/models/group.js" target="_blank">/website/server/models/group.js</a>)
+./groups.js- *
+./groups.js- * @apiSuccessExample {json} Tavern:
+--
+./groups.js-    res.respond(200, groupJson);
+./groups.js-  },
+./groups.js-};
+./groups.js-
+./groups.js-/**
+./groups.js: * @api {put} /api/v3/groups/:groupId Update group
+./groups.js: * @apiName UpdateGroup
+./groups.js- * @apiGroup Group
+./groups.js- *
+./groups.js: * @apiParam (Path) {String} groupId The group _id ('party' for the user party and 'habitrpg'
+./groups.js- *                                   for tavern are accepted).
+./groups.js- *
+./groups.js: * @apiParamExample {String} Tavern:
+./groups.js- *     /api/v3/groups/habitrpg
+./groups.js- *
+./groups.js- * @apiError (400) {NotAuthorized} messageGroupOnlyLeaderCanUpdate Only the group's leader
+./groups.js- *                                                                 can update the party.
+./groups.js- *
+--
+./groups.js-    res.respond(200, response);
+./groups.js-  },
+./groups.js-};
+./groups.js-
+./groups.js-/**
+./groups.js: * @api {post} /api/v3/groups/:groupId/join Join a group
+./groups.js: * @apiName JoinGroup
+./groups.js- * @apiGroup Group
+./groups.js- *
+./groups.js: * @apiParam (Path) {UUID} groupId The group _id ('party' for the user party and 'habitrpg'
+./groups.js- *                                 for tavern are accepted).
+./groups.js- *
+./groups.js: * @apiParamExample {String} Tavern:
+./groups.js- *     /api/v3/groups/habitrpg/join
+./groups.js- *
+./groups.js- * @apiSuccess {Object} data The joined group (See <a href="https://github.com/HabitRPG/habitica/blob/develop/website/server/models/group.js" target="_blank">/website/server/models/group.js</a>)
+./groups.js- *
+./groups.js- * @apiSuccessExample {json} Tavern:
+--
+./groups.js-    res.respond(200, response);
+./groups.js-  },
+./groups.js-};
+./groups.js-
+./groups.js-/**
+./groups.js: * @api {post} /api/v3/groups/:groupId/reject-invite Reject a group invitation
+./groups.js: * @apiName RejectGroupInvite
+./groups.js- * @apiGroup Group
+./groups.js- *
+./groups.js: * @apiParam (Path) {UUID} groupId The group _id ('party' for the user party and 'habitrpg'
+./groups.js- *                                 for tavern are accepted).
+./groups.js- *
+./groups.js: * @apiParamExample {String} party:
+./groups.js- *     /api/v3/groups/party/reject-invite
+./groups.js- *
+./groups.js- * @apiSuccess {Object} data An empty object
+./groups.js- *
+./groups.js- * @apiUse groupIdRequired
+--
+./groups.js-    return true;
+./groups.js-  });
+./groups.js-}
+./groups.js-
+./groups.js-/**
+./groups.js: * @api {post} /api/v3/groups/:groupId/leave Leave a group
+./groups.js: * @apiName LeaveGroup
+./groups.js- * @apiGroup Group
+./groups.js- *
+./groups.js: * @apiParam (Path) {String} groupId The group _id ('party' for the user party and 'habitrpg'
+./groups.js- *                                    for tavern are accepted).
+./groups.js: * @apiParam (Query) {String="remove-all","keep-all"} keep=keep-all Whether or not to keep
+./groups.js- *                                                                  challenge tasks belonging to
+./groups.js- *                                                                  the group being left.
+./groups.js: * @apiParam (Body) {String="remain-in-challenges"
+./groups.js- *                  ,"leave-challenges"} [keepChallenges=leave-challenges] Whether or not
+./groups.js- *                                                                         to remain in the
+./groups.js- *                                                                         challenges of the
+./groups.js- *                                                                         group being left.
+./groups.js- *
+./groups.js: * @apiParamExample {json} Leave Party:
+./groups.js- *     /api/v3/groups/party/leave
+./groups.js- *     {
+./groups.js- *       "keepChallenges": "remain-in-challenges"
+./groups.js- *     }
+./groups.js- *
+--
+./groups.js-    ]);
+./groups.js-  }
+./groups.js-}
+./groups.js-
+./groups.js-/**
+./groups.js: * @api {post} /api/v3/groups/:groupId/removeMember/:memberId Remove a member from a group
+./groups.js: * @apiName RemoveGroupMember
+./groups.js- * @apiGroup Group
+./groups.js- *
+./groups.js: * @apiParam (Path) {String} groupId The group _id ('party' for the user party and 'habitrpg'
+./groups.js- *                                   for tavern are accepted).
+./groups.js: * @apiParam (Path) {UUID} memberId The _id of the member to remove
+./groups.js: * @apiParam (Query) {String} message Query parameter - The message to send to the removed members
+./groups.js- *
+./groups.js: * @apiParamExample {URL} Remove member from party:
+./groups.js- *     /api/v3/groups/party/removeMember/[User's ID]?message=Bye
+./groups.js- *
+./groups.js- * @apiError (400) {BadRequest} userIdrequired "memberId" cannot be empty or not a UUID
+./groups.js- * @apiError (401) {NotAuthorized} onlyLeaderCanRemoveMember Only the group
+./groups.js-                                                             leader can remove members.
+--
+./groups.js-    res.respond(200, {});
+./groups.js-  },
+./groups.js-};
+./groups.js-
+./groups.js-/**
+./groups.js: * @api {post} /api/v3/groups/:groupId/invite Invite users to a group
+./groups.js: * @apiName InviteToGroup
+./groups.js- * @apiGroup Group
+./groups.js: * @apiDescription You can provide both `emails` and `uuids`, or just one.
+./groups.js- * You must provide at least one.
+./groups.js- *
+./groups.js: * @apiParam (Path) {String} groupId The group _id ('party' for the user party and 'habitrpg'
+./groups.js- *                                   for tavern are accepted)
+./groups.js- *
+./groups.js: * @apiParam (Body) {Object[]} [emails] An array of objects, each representing one
+./groups.js- *                                      email address to invite.
+./groups.js: * @apiParam (Body) {String} emails.email The email address of the user being invited.
+./groups.js: * @apiParam (Body) {String} [emails.name] The name of the user being invited.
+./groups.js: * @apiParam (Body) {Array} [uuids] An array of uuids to invite
+./groups.js- *
+./groups.js: * @apiParamExample {json} Emails
+./groups.js- * {
+./groups.js- *   "emails": [
+./groups.js- *     {"email": "user-1@example.com"},
+./groups.js- *     {"name": "User2", "email": "user-2@example.com"}
+./groups.js- *   ]
+./groups.js- * }
+./groups.js: * @apiParamExample {json} User IDs
+./groups.js- *   {
+./groups.js- *     "uuids": ["user-id-of-existing-user", "user-id-of-another-existing-user"]
+./groups.js- *   }
+./groups.js: * @apiParamExample {json} User IDs and Emails
+./groups.js- * {
+./groups.js- *   "emails": [
+./groups.js- *       {"email": "user-1@example.com"},
+./groups.js- *       {"email": "user-2@example.com"}
+./groups.js- *   ],
+--
+./groups.js-    res.respond(200, results);
+./groups.js-  },
+./groups.js-};
+./groups.js-
+./groups.js-/**
+./groups.js: * @api {post} /api/v3/groups/:groupId/add-manager Add a manager to a group
+./groups.js: * @apiName AddGroupManager
+./groups.js- * @apiGroup Group
+./groups.js- *
+./groups.js: * @apiParam (Path) {UUID} groupId The group _id ('party' for the user party and 'habitrpg'
+./groups.js- *                                 for tavern are accepted).
+./groups.js- *
+./groups.js: * @apiParamExample {String} party:
+./groups.js- *     /api/v3/groups/party/add-manager
+./groups.js- *
+./groups.js: * @apiParam (Body) {UUID} managerId The user _id of the member to promote to manager
+./groups.js- *
+./groups.js- * @apiSuccess {Object} data An empty object
+./groups.js- *
+./groups.js- * @apiError (400) {NotAuthorized} managerId req.body.managerId is required
+./groups.js- * @apiUse groupIdRequired
+--
+./groups.js-    res.respond(200, group);
+./groups.js-  },
+./groups.js-};
+./groups.js-
+./groups.js-/**
+./groups.js: * @api {post} /api/v3/groups/:groupId/remove-manager Remove a manager from a group
+./groups.js: * @apiName RemoveGroupManager
+./groups.js- * @apiGroup Group
+./groups.js- *
+./groups.js: * @apiParam (Path) {UUID} groupId The group _id ('party' for the user party and 'habitrpg'
+./groups.js- *                                 for tavern are accepted).
+./groups.js- *
+./groups.js: * @apiParamExample {String} party:
+./groups.js- *     /api/v3/groups/party/add-manager
+./groups.js- *
+./groups.js: * @apiParam (Body) {UUID} managerId The user _id of the member to remove
+./groups.js- *
+./groups.js- * @apiSuccess {Object} group The group
+./groups.js- *
+./groups.js- * @apiError (400) {NotAuthorized} managerId req.body.managerId is required
+./groups.js- * @apiUse groupIdRequired
+--
+./groups.js-    res.respond(200, group);
+./groups.js-  },
+./groups.js-};
+./groups.js-
+./groups.js-/**
+./groups.js: * @api {get} /api/v3/group-plans Get group plans for a user
+./groups.js: * @apiName GetGroupPlans
+./groups.js- * @apiGroup Group
+./groups.js- *
+./groups.js- * @apiSuccess {Object[]} data An array of the requested groups with a group plan (See <a href="https://github.com/HabitRPG/habitica/blob/develop/website/server/models/group.js" target="_blank">/website/server/models/group.js</a>)
+./groups.js- *
+./groups.js- * @apiSuccessExample {json} Groups the user is in with a group plan:
+--
+./groups.js-    res.respond(200, groupPlans);
+./groups.js-  },
+./groups.js-};
+./groups.js-
+./groups.js-/**
+./groups.js: * @api {get} /api/v3/looking-for-party Get users in search of parties
+./groups.js: * @apiName GetLookingForParty
+./groups.js- * @apiGroup Group
+./groups.js- *
+./groups.js: * @apiParam (Query) {Number} [page] Page number, defaults to 0
+./groups.js- *
+./groups.js- * @apiSuccess {Object[]} data An array of users looking for a party
+./groups.js- *
+./groups.js- * @apiError (400) {BadRequest} notPartyLeader You are not the leader of a Party.
+./groups.js- */
+--
+./user.js-const api = {};
+./user.js-
+./user.js-/* NOTE this route has also an API v4 version */
+./user.js-
+./user.js-/**
+./user.js: * @api {get} /api/v3/user Get the authenticated user's profile
+./user.js: * @apiName UserGet
+./user.js- * @apiGroup User
+./user.js- *
+./user.js: * @apiDescription The user profile contains data related to the authenticated
+./user.js- * user including (but not limited to):
+./user.js- * Achievements;
+./user.js- * Authentications (including types and timestamps);
+./user.js- * Challenges memberships (Challenge IDs);
+./user.js- * Flags (including armoire, tutorial, tour etc...);
+--
+./user.js- * PushDevices (identifiers for mobile devices authorized);
+./user.js- * Stats (standard RPG stats, class, buffs, xp, etc..);
+./user.js- * Tags;
+./user.js- * TasksOrder (list of all IDs for Dailys, Habits, Rewards and To Do's).
+./user.js- *
+./user.js: * @apiParam (Query) {String} [userFields] A list of comma-separated user fields to
+./user.js- *                                         be returned instead of the entire document.
+./user.js- *                                         Notifications are always returned.
+./user.js- *
+./user.js- * @apiExample {curl} Example use:
+./user.js- * curl -i https://habitica.com/api/v3/user?userFields=achievements,items.mounts
+--
+./user.js-    await userLib.get(req, res, { isV3: true });
+./user.js-  },
+./user.js-};
+./user.js-
+./user.js-/**
+./user.js: * @api {get} /api/v3/user/inventory/buy
+./user.js- * Get equipment/gear items available for purchase for the authenticated user
+./user.js: * @apiName UserGetBuyList
+./user.js- * @apiGroup User
+./user.js- *
+./user.js- * @apiSuccessExample {json} Success-Response:
+./user.js- * {
+./user.js- *   "success": true,
+--
+./user.js-    res.respond(200, list);
+./user.js-  },
+./user.js-};
+./user.js-
+./user.js-/**
+./user.js: * @api {get} /api/v3/user/in-app-rewards Get the in app items appearing in the user's reward column
+./user.js: * @apiName UserGetInAppRewards
+./user.js- * @apiGroup User
+./user.js- *
+./user.js- * @apiSuccessExample {json} Success-Response:
+./user.js- * {
+./user.js- *   "success": true,
+--
+./user.js-};
+./user.js-
+./user.js-/* NOTE this route has also an API v4 version */
+./user.js-
+./user.js-/**
+./user.js: * @api {put} /api/v3/user Update the user
+./user.js: * @apiName UserUpdate
+./user.js- * @apiGroup User
+./user.js- *
+./user.js: * @apiDescription Some of the user items can be updated, such as preferences, flags and stats.
+./user.js- ^
+./user.js: * @apiParamExample {json} Request-Example:
+./user.js- *  {
+./user.js- *   "achievements.habitBirthdays": 2,
+./user.js- *   "profile.name": "MadPink",
+./user.js- *   "stats.hp": 53,
+./user.js- *   "flags.warnedLowHealth":false,
+--
+./user.js-    await userLib.update(req, res, { isV3: true });
+./user.js-  },
+./user.js-};
+./user.js-
+./user.js-/**
+./user.js: * @api {delete} /api/v3/user Delete an authenticated user's account
+./user.js: * @apiName UserDelete
+./user.js- * @apiGroup User
+./user.js- *
+./user.js: * @apiParam (Body) {String} password The user's password if the account uses local authentication,
+./user.js- * otherwise the localized word "DELETE"
+./user.js: * @apiParam (Body) {String} feedback User's optional feedback explaining reasons for deletion
+./user.js- *
+./user.js- * @apiSuccess {Object} data An empty Object
+./user.js- *
+./user.js- * @apiSuccessExample {json} Result:
+./user.js- *  {
+--
+./user.js-    c.text = `item ${i}`;
+./user.js-  });
+./user.js-}
+./user.js-
+./user.js-/**
+./user.js: * @api {get} /api/v3/user/anonymized Get anonymized user data
+./user.js: * @apiName UserGetAnonymized
+./user.js- * @apiGroup User
+./user.js- *
+./user.js: * @apiDescription Returns the user's data without:
+./user.js- * Authentication information,
+./user.js- * NewMessages/Invitations/Inbox,
+./user.js- * Profile,
+./user.js- * Purchased information,
+./user.js- * Contributor information,
+--
+./user.js-    return res.respond(200, { user, tasks });
+./user.js-  },
+./user.js-};
+./user.js-
+./user.js-/**
+./user.js: * @api {post} /api/v3/user/sleep Make the user start / stop sleeping (resting in the Inn)
+./user.js: * @apiName UserSleep
+./user.js- * @apiGroup User
+./user.js- *
+./user.js: * @apiDescription Toggles the sleep key under user preference true and false.
+./user.js- *
+./user.js- * @apiSuccess {boolean} data user.preferences.sleep
+./user.js- *
+./user.js- * @apiSuccessExample {json} Return-example
+./user.js- * {
+--
+./user.js-
+./user.js-const buySpecialKeys = ['snowball', 'spookySparkles', 'shinySeed', 'seafoam'];
+./user.js-const buyKnownKeys = ['armoire', 'mystery', 'potion', 'quest', 'special'];
+./user.js-
+./user.js-/**
+./user.js: * @api {post} /api/v3/user/buy/:key Buy gear, armoire or potion
+./user.js: * @apiDescription Under the hood uses UserBuyGear, UserBuyPotion and UserBuyArmoire
+./user.js: * @apiName UserBuy
+./user.js- * @apiGroup User
+./user.js- *
+./user.js: * @apiParam (Path) {String} key The item to buy
+./user.js- *
+./user.js- * @apiSuccess data User's data profile
+./user.js- * @apiSuccess message Item purchased
+./user.js- *
+./user.js- * @apiSuccessExample {json} Purchased a rogue short sword for example:
+--
+./user.js-    res.respond(200, ...buyRes);
+./user.js-  },
+./user.js-};
+./user.js-
+./user.js-/**
+./user.js: * @api {post} /api/v3/user/buy-gear/:key Buy a piece of gear
+./user.js: * @apiName UserBuyGear
+./user.js- * @apiGroup User
+./user.js- *
+./user.js: * @apiParam (Path) {String} key The item to buy
+./user.js- *
+./user.js- * @apiSuccess {Object} data.items User's item inventory
+./user.js- * @apiSuccess {Object} data.flags User's flags
+./user.js- * @apiSuccess {Object} data.achievements User's achievements
+./user.js- * @apiSuccess {Object} data.stats User's current stats
+--
+./user.js-    res.respond(200, ...buyGearRes);
+./user.js-  },
+./user.js-};
+./user.js-
+./user.js-/**
+./user.js: * @api {post} /api/v3/user/buy-armoire Buy an Enchanted Armoire item
+./user.js: * @apiName UserBuyArmoire
+./user.js- * @apiGroup User
+./user.js- *
+./user.js- * @apiSuccess {Object} data.items User's item inventory
+./user.js- * @apiSuccess {Object} data.flags User's flags
+./user.js- * @apiSuccess {Object} data.armoire Item given by the armoire
+--
+./user.js-    res.respond(200, ...buyArmoireResponse);
+./user.js-  },
+./user.js-};
+./user.js-
+./user.js-/**
+./user.js: * @api {post} /api/v3/user/buy-health-potion Buy a health potion
+./user.js: * @apiName UserBuyPotion
+./user.js- * @apiGroup User
+./user.js- *
+./user.js- * @apiSuccess {Object} data User's current stats
+./user.js- * @apiSuccess {String} message Success message
+./user.js- *
+--
+./user.js-    res.respond(200, ...buyHealthPotionResponse);
+./user.js-  },
+./user.js-};
+./user.js-
+./user.js-/**
+./user.js: * @api {post} /api/v3/user/buy-mystery-set/:key Buy a Mystery Item set
+./user.js: * @apiName UserBuyMysterySet
+./user.js: * @apiDescription This buys a Mystery Item set using an Hourglass.
+./user.js- * @apiGroup User
+./user.js- *
+./user.js: * @apiParam (Path) {String} key The mystery set to buy
+./user.js- *
+./user.js- * @apiSuccess {Object} data.items user.items
+./user.js- * @apiSuccess {Object} data.purchasedPlanConsecutive user.purchased.plan.consecutive
+./user.js- * @apiSuccess {String} message Success message
+./user.js- *
+--
+./user.js-    res.respond(200, ...buyMysterySetRes);
+./user.js-  },
+./user.js-};
+./user.js-
+./user.js-/**
+./user.js: * @api {post} /api/v3/user/buy-quest/:key Buy a quest with gold
+./user.js: * @apiName UserBuyQuest
+./user.js- * @apiGroup User
+./user.js- *
+./user.js: * @apiParam (Path) {String} key The quest scroll to buy
+./user.js- *
+./user.js- * @apiSuccess {Object} data.quests User's quest list
+./user.js- * @apiSuccess {String} message Success message
+./user.js- *
+./user.js- * @apiSuccessExample {json} Success response:
+--
+./user.js-    res.respond(200, ...buyQuestRes);
+./user.js-  },
+./user.js-};
+./user.js-
+./user.js-/**
+./user.js: * @api {post} /api/v3/user/buy-special-spell/:key Buy special item (card, avatar transformation)
+./user.js: * @apiDescription Includes gift cards (e.g., birthday card), and avatar Transformation
+./user.js- * Items and their antidotes (e.g., Snowball item and Salt reward).
+./user.js: * @apiName UserBuySpecialSpell
+./user.js- * @apiGroup User
+./user.js- *
+./user.js: * @apiParam (Path) {String} key The special item to buy. Must be one of the keys
+./user.js- *                               from "content.special", such as birthday, snowball, salt.
+./user.js- *
+./user.js- * @apiSuccess {Object} data.stats User's current stats
+./user.js- * @apiSuccess {Object} data.items User's current inventory
+./user.js- * @apiSuccess {String} message Success message
+--
+./user.js-    res.respond(200, ...buySpecialSpellRes);
+./user.js-  },
+./user.js-};
+./user.js-
+./user.js-/**
+./user.js: * @api {post} /api/v3/user/hatch/:egg/:hatchingPotion Hatch a pet
+./user.js: * @apiName UserHatch
+./user.js- * @apiGroup User
+./user.js- *
+./user.js: * @apiParam (Path) {String} egg The egg to use
+./user.js: * @apiParam (Path) {String} hatchingPotion The hatching potion to use
+./user.js: * @apiParamExample {URL} Example-URL
+./user.js- * https://habitica.com/api/v3/user/hatch/Dragon/CottonCandyPink
+./user.js- *
+./user.js- * @apiSuccess {Object} data user.items
+./user.js- * @apiSuccess {String} message
+./user.js- *
+--
+./user.js-    });
+./user.js-  },
+./user.js-};
+./user.js-
+./user.js-/**
+./user.js: * @api {post} /api/v3/user/equip/:type/:key Equip or unequip an item
+./user.js: * @apiName UserEquip
+./user.js- * @apiGroup User
+./user.js- *
+./user.js: * @apiParam (Path) {String="mount","pet","costume","equipped"} type The type of item
+./user.js- *                                                                   to equip or unequip.
+./user.js: * @apiParam (Path) {String} key The item to equip or unequip
+./user.js- *
+./user.js: * @apiParamExample {URL} Example-URL
+./user.js- * https://habitica.com/api/v3/user/equip/equipped/weapon_warrior_2
+./user.js- *
+./user.js- * @apiSuccess {Object} data user.items
+./user.js- * @apiSuccess {String} message Optional success message for unequipping an items
+./user.js- *
+--
+./user.js-    res.respond(200, ...equipRes);
+./user.js-  },
+./user.js-};
+./user.js-
+./user.js-/**
+./user.js: * @api {post} /api/v3/user/feed/:pet/:food Feed a pet
+./user.js: * @apiName UserFeed
+./user.js- * @apiGroup User
+./user.js- *
+./user.js: * @apiParam (Path) {String} pet
+./user.js: * @apiParam (Path) {String} food
+./user.js: * @apiParam (Query) {Number} [amount] The amount of food to feed.
+./user.js- *                                     Note: Pet can eat 50 units.
+./user.js- *                                     Preferred food offers 5 units per food,
+./user.js- *                                     other food 2 units.
+./user.js- *
+./user.js: * @apiParamExample {url} Example-URL
+./user.js- * https://habitica.com/api/v3/user/feed/Armadillo-Shade/Chocolate
+./user.js- * https://habitica.com/api/v3/user/feed/Armadillo-Shade/Chocolate?amount=9
+./user.js- *
+./user.js- * @apiSuccess {Number} data The pet value
+./user.js- * @apiSuccess {String} message Success message
+--
+./user.js-    }
+./user.js-  },
+./user.js-};
+./user.js-
+./user.js-/**
+./user.js: * @api {post} /api/v3/user/change-class Change class
+./user.js: * @apiDescription User must be at least level 10. If ?class is
+./user.js- * defined and user.flags.classSelected is false it'll change the class.
+./user.js- * If user.preferences.disableClasses it'll enable classes, otherwise it
+./user.js- * sets user.flags.classSelected to false (costs 3 gems).
+./user.js: * @apiName UserChangeClass
+./user.js- * @apiGroup User
+./user.js- *
+./user.js: * @apiParam (Query) {String} class Query parameter - ?class={warrior|rogue|wizard|healer}
+./user.js- *
+./user.js- * @apiSuccess {Object} data.flags user.flags
+./user.js- * @apiSuccess {Object} data.stats user.stats
+./user.js- * @apiSuccess {Object} data.preferences user.preferences
+./user.js- * @apiSuccess {Object} data.items user.items
+--
+./user.js-    res.respond(200, ...changeClassRes);
+./user.js-  },
+./user.js-};
+./user.js-
+./user.js-/**
+./user.js: * @api {post} /api/v3/user/disable-classes Disable classes
+./user.js: * @apiName UserDisableClasses
+./user.js- * @apiGroup User
+./user.js- *
+./user.js- * @apiSuccess {Object} data.flags user.flags
+./user.js- * @apiSuccess {Object} data.stats user.stats
+./user.js- * @apiSuccess {Object} data.preferences user.preferences
+--
+./user.js-    res.respond(200, ...disableClassesRes);
+./user.js-  },
+./user.js-};
+./user.js-
+./user.js-/**
+./user.js: * @api {post} /api/v3/user/purchase/:type/:key Purchase Gem or Gem-purchasable item
+./user.js: * @apiName UserPurchase
+./user.js- * @apiGroup User
+./user.js- *
+./user.js: * @apiParam (Path) {String="gems","eggs","hatchingPotions","premiumHatchingPotions"
+./user.js-                    ,"food","quests","gear","pets"} type Type of item to purchase.
+./user.js: * @apiParam (Path) {String} key Item's key (use "gem" for purchasing gems)
+./user.js- *
+./user.js: * @apiParam (Body) {Integer} [quantity=1] Count of items to buy.
+./user.js- *                                         Defaults to 1 and is ignored
+./user.js- *                                         for items where quantity is irrelevant.
+./user.js- *
+./user.js- * @apiSuccess {Object} data.items user.items
+./user.js- * @apiSuccess {Number} data.balance user.balance
+--
+./user.js-    res.respond(200, ...purchaseRes);
+./user.js-  },
+./user.js-};
+./user.js-
+./user.js-/**
+./user.js: * @api {post} /api/v3/user/purchase-hourglass/:type/:key Purchase Hourglass-purchasable item
+./user.js: * @apiName UserPurchaseHourglass
+./user.js: * @apiDescription Purchases an Hourglass-purchasable item.
+./user.js- * Does not include Mystery Item sets (use /api/v3/user/buy-mystery-set/:key).
+./user.js- * @apiGroup User
+./user.js- *
+./user.js: * @apiParam (Path) {String="pets","mounts"} type The type of item to purchase
+./user.js: * @apiParam (Path) {String} key Ex: {Phoenix-Base}. The key for the mount/pet
+./user.js- *
+./user.js: * @apiParam (Body) {Integer} [quantity=1] Count of items to buy.
+./user.js- *                                         Defaults to 1 and is ignored
+./user.js- *                                         for items where quantity is irrelevant.
+./user.js- *
+./user.js- * @apiSuccess {Object} data.items user.items
+./user.js- * @apiSuccess {Object} data.purchasedPlanConsecutive user.purchased.plan.consecutive
+--
+./user.js-    res.respond(200, ...purchaseHourglassRes);
+./user.js-  },
+./user.js-};
+./user.js-
+./user.js-/**
+./user.js: * @api {post} /api/v3/user/read-card/:cardType Read a card
+./user.js: * @apiName UserReadCard
+./user.js- * @apiGroup User
+./user.js- *
+./user.js: * @apiParam (Path) {String} cardType Type of card to read (e.g. - birthday,
+./user.js- *                                    greeting, nye, thankyou, valentine).
+./user.js- *
+./user.js- * @apiSuccess {Object} data.specialItems user.items.special
+./user.js- * @apiSuccess {Boolean} data.cardReceived user.flags.cardReceived
+./user.js- * @apiSuccess {String} message Success message
+--
+./user.js-    res.respond(200, ...readCardRes);
+./user.js-  },
+./user.js-};
+./user.js-
+./user.js-/**
+./user.js: * @api {post} /api/v3/user/open-mystery-item Open the Mystery Item box
+./user.js: * @apiName UserOpenMysteryItem
+./user.js- * @apiGroup User
+./user.js- *
+./user.js- * @apiSuccess {Object} data The item obtained
+./user.js- * @apiSuccess {String} message Success message
+./user.js- *
+--
+./user.js-    await user.save();
+./user.js-    res.respond(200, ...openMysteryItemRes);
+./user.js-  },
+./user.js-};
+./user.js-
+./user.js:/* @api {post} /api/v3/user/release-pets Release pets
+./user.js: * @apiName UserReleasePets
+./user.js- * @apiGroup User
+./user.js- *
+./user.js- * @apiSuccess {Object} data.items `user.items.pets`
+./user.js- * @apiSuccess {String} message Success message
+./user.js- *
+--
+./user.js-    res.respond(200, ...releasePetsRes);
+./user.js-  },
+./user.js-};
+./user.js-
+./user.js-/**
+./user.js: * @api {post} /api/v3/user/release-both Release pets and mounts and grants Triad Bingo
+./user.js: * @apiName UserReleaseBoth
+./user.js- * @apiGroup User
+./user.js- *
+./user.js- * @apiSuccess {Object} data.achievements
+./user.js- * @apiSuccess {Object} data.items
+./user.js- * @apiSuccess {Number} data.balance
+--
+./user.js-    res.respond(200, ...releaseBothRes);
+./user.js-  },
+./user.js-};
+./user.js-
+./user.js-/**
+./user.js: * @api {post} /api/v3/user/release-mounts Release mounts
+./user.js: * @apiName UserReleaseMounts
+./user.js- * @apiGroup User
+./user.js- *
+./user.js- * @apiSuccess {Object} data user.items.mounts
+./user.js- * @apiSuccess {String} message Success message
+./user.js- *
+--
+./user.js-    res.respond(200, ...releaseMountsRes);
+./user.js-  },
+./user.js-};
+./user.js-
+./user.js-/**
+./user.js: * @api {post} /api/v3/user/sell/:type/:key Sell a gold-sellable item owned by the user
+./user.js: * @apiName UserSell
+./user.js- * @apiGroup User
+./user.js- *
+./user.js: * @apiParam (Path) {String="eggs","hatchingPotions","food"} type The type of item to sell.
+./user.js: * @apiParam (Path) {String} key The key of the item
+./user.js: * @apiParam (Query) {Number} [amount] The amount to sell
+./user.js- *
+./user.js- * @apiSuccess {Object} data.stats
+./user.js- * @apiSuccess {Object} data.items
+./user.js- *
+./user.js- * @apiError {NotFound} InvalidKey Key not found for user.items eggs
+--
+./user.js-    res.respond(200, ...sellRes);
+./user.js-  },
+./user.js-};
+./user.js-
+./user.js-/**
+./user.js: * @api {post} /api/v3/user/unlock Unlock item or set of items by purchase
+./user.js: * @apiName UserUnlock
+./user.js- * @apiGroup User
+./user.js- *
+./user.js: * @apiParam (Query) {String} path Full path to unlock. See "content" API call for list of items.
+./user.js- *
+./user.js: * @apiParamExample {curl} Example call:
+./user.js- * curl -X POST https://habitica.com/api/v3/user/unlock?path=background.midnight_clouds
+./user.js- * curl -X POST https://habitica.com/api/v3/user/unlock?path=hair.color.midnight
+./user.js- *
+./user.js- * @apiSuccess {Object} data.purchased
+./user.js- * @apiSuccess {Object} data.items
+--
+./user.js-    res.respond(200, ...unlockRes);
+./user.js-  },
+./user.js-};
+./user.js-
+./user.js-/**
+./user.js: * @api {post} /api/v3/user/revive Revive user from death
+./user.js: * @apiName UserRevive
+./user.js- * @apiGroup User
+./user.js- *
+./user.js- * @apiSuccess {Object} data user.items
+./user.js- * @apiSuccess {String} message Success message
+./user.js- *
+--
+./user.js-};
+./user.js-
+./user.js-/* NOTE this route has also an API v4 version */
+./user.js-
+./user.js-/**
+./user.js: * @api {post} /api/v3/user/rebirth Use Orb of Rebirth on user
+./user.js: * @apiName UserRebirth
+./user.js- * @apiGroup User
+./user.js- *
+./user.js- * @apiSuccess {Object} data.user
+./user.js- * @apiSuccess {Array} data.tasks User's modified tasks (no rewards)
+./user.js- * @apiSuccess {String} message Success message
+--
+./user.js-    await userLib.rebirth(req, res, { isV3: true });
+./user.js-  },
+./user.js-};
+./user.js-
+./user.js-/**
+./user.js: * @api {post} /api/v3/user/block/:uuid Block / unblock a user from sending you a PM
+./user.js: * @apiName BlockUser
+./user.js- * @apiGroup User
+./user.js- *
+./user.js: * @apiParam (Path) {UUID} uuid The uuid of the user to block / unblock
+./user.js- *
+./user.js- * @apiSuccess {Array} data user.inbox.blocks
+./user.js- *
+./user.js- * @apiSuccessExample {json} Example return:
+./user.js- * {"success":true,"data":["e4842579-g987-d2d2-8660-2f79e725fb79"],"notifications":[]}
+--
+./user.js-};
+./user.js-
+./user.js-/* NOTE this route has also an API v4 version */
+./user.js-
+./user.js-/**
+./user.js: * @api {delete} /api/v3/user/messages/:id Delete a message
+./user.js: * @apiName deleteMessage
+./user.js- * @apiGroup User
+./user.js- *
+./user.js: * @apiParam (Path) {UUID} id The id of the message to delete
+./user.js- *
+./user.js- * @apiSuccess {Object} data user.inbox.messages
+./user.js- * @apiSuccessExample {json} Example return:
+./user.js- * {
+./user.js- *   "success": true,
+--
+./user.js-};
+./user.js-
+./user.js-/* NOTE this route has also an API v4 version */
+./user.js-
+./user.js-/**
+./user.js: * @api {delete} /api/v3/user/messages Delete all messages
+./user.js: * @apiName clearMessages
+./user.js- * @apiGroup User
+./user.js- *
+./user.js- * @apiSuccess {Object} data user.inbox.messages which should be empty
+./user.js- *
+./user.js- * @apiSuccessExample {json} Example return:
+--
+./user.js-    res.respond(200, ...[]);
+./user.js-  },
+./user.js-};
+./user.js-
+./user.js-/**
+./user.js: * @api {post} /api/v3/user/mark-pms-read Mark Private Messages as read
+./user.js: * @apiName markPmsRead
+./user.js- * @apiGroup User
+./user.js- *
+./user.js- * @apiSuccess {Object} data user.inbox.newMessages
+./user.js- *
+./user.js- * @apiSuccessExample {json} Example return:
+--
+./user.js-};
+./user.js-
+./user.js-/* NOTE this route has also an API v4 version */
+./user.js-
+./user.js-/**
+./user.js: * @api {post} /api/v3/user/reroll Reroll a user (reset tasks) using the Fortify Potion
+./user.js: * @apiName UserReroll
+./user.js- * @apiGroup User
+./user.js- *
+./user.js- * @apiSuccess {Object} data.user
+./user.js- * @apiSuccess {Object} data.tasks User's modified tasks (no rewards)
+./user.js- * @apiSuccess {Object} message Success message
+--
+./user.js-};
+./user.js-
+./user.js-/* NOTE this route has also an API v4 version */
+./user.js-
+./user.js-/**
+./user.js: * @api {post} /api/v3/user/reset Reset user
+./user.js: * @apiName UserReset
+./user.js- * @apiGroup User
+./user.js- *
+./user.js- * @apiSuccess {Object} data.user
+./user.js- * @apiSuccess {Array} data.tasksToRemove IDs of removed tasks
+./user.js- * @apiSuccess {String} message Success message
+--
+./user.js-    await userLib.reset(req, res, { isV3: true });
+./user.js-  },
+./user.js-};
+./user.js-
+./user.js-/**
+./user.js: * @api {post} /api/v3/user/custom-day-start Set Custom Day Start time for user.
+./user.js: * @apiName setCustomDayStart
+./user.js- * @apiGroup User
+./user.js- *
+./user.js: * @apiParam (Body) {number} [dayStart=0] The hour number 0-23 for day to begin.
+./user.js- *                                        If not supplied, will default to 0.
+./user.js- *
+./user.js: * @apiParamExample {json} Request-Example:
+./user.js- * {"dayStart":2}
+./user.js- *
+./user.js- * @apiSuccess {Object} data An empty Object
+./user.js- * @apiSuccess {String} message Success message
+./user.js- *
+--
+./user.js-    });
+./user.js-  },
+./user.js-};
+./user.js-
+./user.js-/**
+./user.js: * @api {get} /user/toggle-pinned-item/:key Toggle an item to be pinned
+./user.js: * @apiName togglePinnedItem
+./user.js- * @apiGroup User
+./user.js- *
+./user.js- * @apiSuccess {Object} data Pinned items array
+./user.js- *
+./user.js- * @apiSuccessExample {json} Result:
+--
+./user.js-    });
+./user.js-  },
+./user.js-};
+./user.js-
+./user.js-/**
+./user.js: * @api {post} /api/v3/user/move-pinned-item/:type/:path/move/to/:position
+./user.js- * Move a pinned item in the rewards column to a new position after being sorted
+./user.js: * @apiName MovePinnedItem
+./user.js- * @apiGroup User
+./user.js- *
+./user.js: * @apiParam (Path) {String} path The unique item path used for pinning
+./user.js: * @apiParam (Path) {Number} position Where to move the task.
+./user.js- *                                    0 = top of the list ("push to top").
+./user.js- *                                   -1 = bottom of the list ("push to bottom").
+./user.js- *
+./user.js- * @apiSuccess {Array} data The new pinned items order.
+./user.js- *
+--
+./world.js-} from '../../libs/worldState';
+./world.js-
+./world.js-const api = {};
+./world.js-
+./world.js-/**
+./world.js: * @api {get} /api/v3/world-state Get the state for the game world
+./world.js: * @apiDescription Does not require authentication.
+./world.js: * @apiName WorldStateGet
+./world.js- * @apiGroup WorldState
+./world.js- *
+./world.js- * @apiSuccess {Object} data.worldBoss.active Boolean, true if world boss quest is underway
+./world.js- * @apiSuccess {Object} data.worldBoss.extra.worldDmg Object with NPC names
+./world.js- *                                                    as Boolean properties, true if they
+--
+./auth.js-const TECH_ASSISTANCE_EMAIL = nconf.get('EMAILS_TECH_ASSISTANCE_EMAIL');
+./auth.js-
+./auth.js-const api = {};
+./auth.js-
+./auth.js-/**
+./auth.js: * @api {post} /api/v3/user/auth/local/register Register
+./auth.js: * @apiDescription Register a new user with email, login name, and password or
+./auth.js- * attach local authentication to a social auth user
+./auth.js: * @apiName UserRegisterLocal
+./auth.js- * @apiGroup User
+./auth.js- *
+./auth.js: * @apiParam (Body) {String} username Login name of the new user.
+./auth.js- *                                    Must be 1-36 characters, containing only a-z, 0-9,
+./auth.js- *                                    hyphens (-), or underscores (_).
+./auth.js: * @apiParam (Body) {String} email Email address of the new user
+./auth.js: * @apiParam (Body) {String} password Password for the new user
+./auth.js: * @apiParam (Body) {String} confirmPassword Password confirmation
+./auth.js- *
+./auth.js- * @apiSuccess {Object} data The user object, if local auth was just
+./auth.js- *                           attached to a social user then only user.auth.local
+./auth.js- */
+./auth.js-api.registerLocal = {
+--
+./auth.js-    await registerLocal(req, res, { isV3: true });
+./auth.js-  },
+./auth.js-};
+./auth.js-
+./auth.js-/**
+./auth.js: * @api {post} /api/v3/user/auth/local/login Login
+./auth.js: * @apiDescription Login a user with email / username and password
+./auth.js: * @apiName UserLoginLocal
+./auth.js- * @apiGroup User
+./auth.js- *
+./auth.js: * @apiParam (Body) {String} username Username or email of the user
+./auth.js: * @apiParam (Body) {String} password The user's password
+./auth.js- *
+./auth.js- * @apiSuccess {String} data._id The user's unique identifier
+./auth.js- * @apiSuccess {String} data.apiToken The user's api token
+./auth.js- *                                    that must be used to authenticate requests.
+./auth.js- * @apiSuccess {Boolean} data.newUser Returns true if the user was just created
+--
+./auth.js-    return loginSocial(req, res);
+./auth.js-  },
+./auth.js-};
+./auth.js-
+./auth.js-/**
+./auth.js: * @api {put} /api/v3/user/auth/update-username Update username
+./auth.js: * @apiDescription Update and verify the user's username
+./auth.js: * @apiName UpdateUsername
+./auth.js- * @apiGroup User
+./auth.js- *
+./auth.js: * @apiParam (Body) {String} username The new username
+./auth.js: * @apiParam (Body) {String} password The user's password if they use local authentication.
+./auth.js- * Omit if they use social auth.
+./auth.js- *
+./auth.js- * @apiSuccess {String} data.username The new username
+./auth.js- * */
+./auth.js-api.updateUsername = {
+--
+./auth.js-    res.respond(200, { username: req.body.username });
+./auth.js-  },
+./auth.js-};
+./auth.js-
+./auth.js-/**
+./auth.js: * @api {put} /api/v3/user/auth/update-password Update password
+./auth.js: * @apiDescription Update the password of a local user
+./auth.js: * @apiName UpdatePassword
+./auth.js- * @apiGroup User
+./auth.js- *
+./auth.js: * @apiParam (Body) {String} password The old password
+./auth.js: * @apiParam (Body) {String} newPassword The new password
+./auth.js: * @apiParam (Body) {String} confirmPassword New password confirmation
+./auth.js- *
+./auth.js- * @apiSuccess {Object} data An empty object
+./auth.js- * */
+./auth.js-api.updatePassword = {
+./auth.js-  method: 'PUT',
+--
+./auth.js-    res.respond(200, {});
+./auth.js-  },
+./auth.js-};
+./auth.js-
+./auth.js-/**
+./auth.js: * @api {post} /api/v3/user/reset-password Reset password (email a reset link)
+./auth.js: * @apiDescription Send the user an email to let them reset their password
+./auth.js: * @apiName ResetPassword
+./auth.js- * @apiGroup User
+./auth.js- *
+./auth.js: * @apiParam (Body) {String} email The email address of the user
+./auth.js- *
+./auth.js- * @apiSuccess {String} message The localized success message
+./auth.js- * */
+./auth.js-api.resetPassword = {
+./auth.js-  method: 'POST',
+--
+./auth.js-    res.respond(200, {}, res.t('passwordReset'));
+./auth.js-  },
+./auth.js-};
+./auth.js-
+./auth.js-/**
+./auth.js: * @api {put} /api/v3/user/auth/update-email Update email
+./auth.js: * @apiDescription Change the user email address
+./auth.js: * @apiName UpdateEmail
+./auth.js- * @apiGroup User
+./auth.js- *
+./auth.js: * @apiParam (Body) {String} newEmail The new email address.
+./auth.js: * @apiParam (Body) {String} password The user password.
+./auth.js- *
+./auth.js- * @apiSuccess {String} data.email The updated email address
+./auth.js- */
+./auth.js-api.updateEmail = {
+./auth.js-  method: 'PUT',
+--
+./auth.js-    return res.respond(200, { email: user.auth.local.email });
+./auth.js-  },
+./auth.js-};
+./auth.js-
+./auth.js-/**
+./auth.js: * @api {post} /api/v3/user/auth/reset-password-set-new-one Reset password (set a new one)
+./auth.js: * @apiDescription Set a new password for a user that reset theirs. Not meant for public usage.
+./auth.js: * @apiName ResetPasswordSetNewOne
+./auth.js- * @apiGroup User
+./auth.js- *
+./auth.js: * @apiParam (Body) {String} newPassword The new password.
+./auth.js: * @apiParam (Body) {String} confirmPassword Password confirmation.
+./auth.js- *
+./auth.js- * @apiSuccess {String} data An empty object
+./auth.js- * @apiSuccess {String} data Success message
+./auth.js- */
+./auth.js-api.resetPasswordSetNewOne = {
+--
+./auth.js-    return res.respond(200, {}, res.t('passwordChangeSuccess'));
+./auth.js-  },
+./auth.js-};
+./auth.js-
+./auth.js-/**
+./auth.js: * @api {delete} /api/v3/user/auth/social/:network Delete social authentication method
+./auth.js: * @apiDescription Remove a social authentication method from a user profile.
+./auth.js- * The user must have another authentication method enabled.
+./auth.js: * @apiName UserDeleteSocial
+./auth.js- * @apiGroup User
+./auth.js- *
+./auth.js- * @apiSuccess {Object} data Empty object
+./auth.js- */
+./auth.js-api.deleteSocial = {
+--
+./tags.js- */
+./tags.js-
+./tags.js-const api = {};
+./tags.js-
+./tags.js-/**
+./tags.js: * @api {post} /api/v3/tags Create a new tag
+./tags.js: * @apiName CreateTag
+./tags.js- * @apiGroup Tag
+./tags.js- *
+./tags.js: * @apiParam (Body) {string} name The name of the tag to be added.
+./tags.js- *
+./tags.js: * @apiParamExample {json} Example body:
+./tags.js- * {"name":"practicetag"}
+./tags.js- *
+./tags.js- * @apiSuccess (201) {Object} data The newly created tag
+./tags.js- *
+./tags.js- * @apiSuccessExample {json} Example return:
+--
+./tags.js-    res.respond(201, tag);
+./tags.js-  },
+./tags.js-};
+./tags.js-
+./tags.js-/**
+./tags.js: * @api {get} /api/v3/tags Get a user's tags
+./tags.js: * @apiName GetTags
+./tags.js- * @apiGroup Tag
+./tags.js- *
+./tags.js- * @apiSuccess {Array} data An array of tags
+./tags.js- *
+./tags.js- * @apiSuccessExample {json} Example return:
+--
+./tags.js-    res.respond(200, user.tags);
+./tags.js-  },
+./tags.js-};
+./tags.js-
+./tags.js-/**
+./tags.js: * @api {get} /api/v3/tags/:tagId Get a tag
+./tags.js: * @apiName GetTag
+./tags.js- * @apiGroup Tag
+./tags.js- *
+./tags.js: * @apiParam (Path) {UUID} tagId The tag _id
+./tags.js- *
+./tags.js- * @apiSuccess {Object} data The tag object
+./tags.js- *
+./tags.js- * @apiSuccessExample {json} Example return:
+./tags.js- * {"success":true,"data":{"name":"practicetag",
+--
+./tags.js-    res.respond(200, tag);
+./tags.js-  },
+./tags.js-};
+./tags.js-
+./tags.js-/**
+./tags.js: * @api {put} /api/v3/tags/:tagId Update a tag
+./tags.js: * @apiName UpdateTag
+./tags.js- * @apiGroup Tag
+./tags.js- *
+./tags.js: * @apiParam (Path) {UUID} tagId The tag _id
+./tags.js: * @apiParam (Body) {string} name The new name of the tag.
+./tags.js- *
+./tags.js: * @apiParamExample {json} Example body:
+./tags.js- * {"name":"prac-tag"}
+./tags.js- *
+./tags.js- * @apiSuccess {Object} data The updated tag
+./tags.js- *
+./tags.js- * @apiSuccessExample {json} Example result:
+--
+./tags.js-    res.respond(200, _.find(savedUser.tags, { id: tagId }));
+./tags.js-  },
+./tags.js-};
+./tags.js-
+./tags.js-/**
+./tags.js: * @api {post} /api/v3/reorder-tags Reorder a tag
+./tags.js: * @apiName ReorderTags
+./tags.js- * @apiGroup Tag
+./tags.js- *
+./tags.js: * @apiParam (Body) {UUID} tagId Id of the tag to move
+./tags.js: * @apiParam (Body) {Number} to Position the tag is moving to
+./tags.js- *
+./tags.js: * @apiParamExample {json} Example request:
+./tags.js- * {"tagId":"c6855fae-ca15-48af-a88b-86d0c65ead47","to":0}
+./tags.js- *
+./tags.js- * @apiSuccess {Object} data An empty object
+./tags.js- *
+./tags.js- * @apiSuccessExample {json} Example return:
+--
+./tags.js-    res.respond(200, {});
+./tags.js-  },
+./tags.js-};
+./tags.js-
+./tags.js-/**
+./tags.js: * @api {delete} /api/v3/tags/:tagId Delete a user tag
+./tags.js: * @apiName DeleteTag
+./tags.js- * @apiGroup Tag
+./tags.js- *
+./tags.js: * @apiParam (Path) {UUID} tagId The tag _id
+./tags.js- *
+./tags.js- * @apiSuccess {Object} data An empty object
+./tags.js- *
+./tags.js- * @apiSuccessExample {jsom} Example return:
+./tags.js- * {"success":true,"data":{},"notifications":[]}
+--
+./shops.js-
+./shops.js-const api = {};
+./shops.js-
+./shops.js-/**
+./shops.js- * @apiIgnore
+./shops.js: * @api {get} /api/v3/shops/market get the available items for the market
+./shops.js: * @apiName GetMarketItems
+./shops.js- * @apiGroup Shops
+./shops.js- *
+./shops.js- * @apiSuccess {Object} data List of available items
+./shops.js- * @apiSuccess {string} message Success message
+./shops.js- */
+--
+./shops.js-  },
+./shops.js-};
+./shops.js-
+./shops.js-/**
+./shops.js- * @apiIgnore
+./shops.js: * @api {get} /api/v3/shops/market-gear get the available gear for the market
+./shops.js: * @apiName GetMarketGear
+./shops.js- * @apiGroup Shops
+./shops.js- *
+./shops.js- * @apiSuccess {Object} data List of available gear
+./shops.js- */
+./shops.js-api.getMarketGear = {
+--
+./shops.js-  },
+./shops.js-};
+./shops.js-
+./shops.js-/**
+./shops.js- * @apiIgnore
+./shops.js: * @api {get} /api/v3/shops/quests get the available items for the quests shop
+./shops.js: * @apiName GetQuestShopItems
+./shops.js- * @apiGroup Shops
+./shops.js- *
+./shops.js- * @apiSuccess {Object} data List of available quests
+./shops.js- * @apiSuccess {string} message Success message
+./shops.js- */
+--
+./shops.js-  },
+./shops.js-};
+./shops.js-
+./shops.js-/**
+./shops.js- * @apiIgnore
+./shops.js: * @api {get} /api/v3/shops/time-travelers get the available items for the time travelers shop
+./shops.js: * @apiName GetTimeTravelersShopItems
+./shops.js- * @apiGroup Shops
+./shops.js- *
+./shops.js- * @apiSuccess {Object} data List of available items
+./shops.js- * @apiSuccess {string} message Success message
+./shops.js- */
+--
+./shops.js-  },
+./shops.js-};
+./shops.js-
+./shops.js-/**
+./shops.js- * @apiIgnore
+./shops.js: * @api {get} /api/v3/shops/seasonal get the available items for the seasonal shop
+./shops.js: * @apiName GetSeasonalShopItems
+./shops.js- * @apiGroup Shops
+./shops.js- *
+./shops.js- * @apiSuccess {Object} data List of available items
+./shops.js- * @apiSuccess {string} message Success message
+./shops.js- */
+--
+./shops.js-  },
+./shops.js-};
+./shops.js-
+./shops.js-/**
+./shops.js- * @apiIgnore
+./shops.js: * @api {get} /api/v3/shops/backgrounds get the available items for the backgrounds shop
+./shops.js: * @apiName GetBackgroundsShopItems
+./shops.js- * @apiGroup Shops
+./shops.js- *
+./shops.js- * @apiSuccess {Object} data List of available backgrounds
+./shops.js- * @apiSuccess {string} message Success message
+./shops.js- */
+--
+./members.js-const { achievements } = common;
+./members.js-
+./members.js-const api = {};
+./members.js-
+./members.js-/**
+./members.js: * @api {get} /api/v3/members/:memberId Get a member profile
+./members.js: * @apiName GetMember
+./members.js- * @apiGroup Member
+./members.js- *
+./members.js: * @apiParam (Path) {UUID} memberId The member's id
+./members.js- *
+./members.js- * @apiSuccess {Object} data The member object
+./members.js- *
+./members.js- * @apiSuccess {Object} data.inbox Basic information about person's inbox
+./members.js- * @apiSuccess {Object} data.stats Includes current stats and buffs
+--
+./members.js-    res.respond(200, memberToJSON);
+./members.js-  },
+./members.js-};
+./members.js-
+./members.js-/**
+./members.js: * @api {get} /api/v3/members/:memberId/achievements Get member achievements object
+./members.js: * @apiName GetMemberAchievements
+./members.js- * @apiGroup Member
+./members.js: * @apiDescription Get a list of achievements
+./members.js- * of the requested member, grouped by basic / seasonal / special.
+./members.js- *
+./members.js: * @apiParam (Path) {UUID} memberId The member's id
+./members.js- *
+./members.js- * @apiSuccess {Object} data The achievements object
+./members.js- *
+./members.js- * @apiSuccess {Object} data.basic The basic achievements object
+./members.js- * @apiSuccess {Object} data.seasonal The seasonal achievements object
+--
+./members.js-    res.respond(200, members);
+./members.js-  };
+./members.js-}
+./members.js-
+./members.js-/**
+./members.js: * @api {get} /api/v3/groups/:groupId/members Get members for a group
+./members.js: * @apiDescription With a limit of 30 member per request (by default).
+./members.js- * To get all members run requests against this routes (updating the lastId query parameter)
+./members.js- * until you get less than 30 results (or the specified limit).
+./members.js: * @apiName GetMembersForGroup
+./members.js- * @apiGroup Member
+./members.js- *
+./members.js: * @apiParam (Path) {UUID} groupId The group id ('party' for the user party is accepted)
+./members.js: * @apiParam (Query) {UUID} lastId Query parameter to specify the last member
+./members.js- *                                 returned in a previous request to this route and
+./members.js- *                                 get the next batch of results.
+./members.js: * @apiParam (Query) {Number} limit=30 BETA Query parameter
+./members.js- *                                     to specify the number of results to return. Max is 60.
+./members.js: * @apiParam (Query) {Boolean} includeAllPublicFields If set to `true`
+./members.js- *                                                    then all public fields for members
+./members.js- *                                                    will be returned (similar to when making
+./members.js- *                                                    a request for a single member).
+./members.js: * @apiParam (Query) {Boolean} includeTasks If set to `true`, then
+./members.js- *                                response should include all tasks per user
+./members.js- *                                related to the challenge
+./members.js- *
+./members.js- * @apiSuccess {Array} data An array of members, sorted by _id
+./members.js- *
+--
+./members.js-  middlewares: [authWithHeaders()],
+./members.js-  handler: _getMembersForItem('group-members'),
+./members.js-};
+./members.js-
+./members.js-/**
+./members.js: * @api {get} /api/v3/groups/:groupId/invites Get invites for a group
+./members.js: * @apiDescription With a limit of 30 member per request (by default). To get all invites run
+./members.js- * requests against this routes (updating the lastId query parameter)
+./members.js- * until you get less than 30 results.
+./members.js: * @apiName GetInvitesForGroup
+./members.js- * @apiGroup Member
+./members.js- *
+./members.js: * @apiParam (Path) {UUID} groupId The group id ('party' for the user party is accepted)
+./members.js: * @apiParam (Query) {UUID} lastId Query parameter to specify the last invite
+./members.js- *                                 returned in a previous request to this route and
+./members.js- *                                 get the next batch of results.
+./members.js: * @apiParam (Query) {Number} limit=30 BETA Query parameter
+./members.js- *                                     to specify the number of results to return. Max is 60.
+./members.js: * @apiParam (Query) {Boolean} includeAllPublicFields If set to `true`
+./members.js- *                                                    then all public fields for members
+./members.js- *                                                    will be returned (similar to when making
+./members.js- *                                                    a request for a single member).
+./members.js- *
+./members.js- * @apiSuccess {array} data An array of invites, sorted by _id
+--
+./members.js-  middlewares: [authWithHeaders()],
+./members.js-  handler: _getMembersForItem('group-invites'),
+./members.js-};
+./members.js-
+./members.js-/**
+./members.js: * @api {get} /api/v3/challenges/:challengeId/members Get members for a challenge
+./members.js: * @apiDescription With a limit of 30 member per request (by default).
+./members.js- * To get all members run requests against this routes (updating the lastId query parameter)
+./members.js- * until you get less than 30 results.
+./members.js- * BETA You can also use ?includeAllMembers=true. This option is currently in BETA
+./members.js- * and may be removed in future.
+./members.js- * Its use is discouraged and its performances are not optimized especially for large challenges.
+./members.js- *
+./members.js: * @apiName GetMembersForChallenge
+./members.js- * @apiGroup Member
+./members.js- *
+./members.js: * @apiParam (Path) {UUID} challengeId The challenge id
+./members.js: * @apiParam (Query) {UUID} lastId Query parameter to specify the last member returned
+./members.js- *                                 in a previous request to this route and
+./members.js- *                                 get the next batch of results.
+./members.js: * @apiParam (Query) {Number} limit=30 BETA Query parameter to
+./members.js- *                                     specify the number of results to return. Max is 60.
+./members.js: * @apiParam (Query) {Boolean} includeTasks BETA Query parameter - If 'true'
+./members.js- *                                                    then include challenge tasks of each member
+./members.js: * @apiParam (Query) {Boolean} includeAllPublicFields If set to `true`
+./members.js- *                                                    then all public fields for members
+./members.js- *                                                    will be returned (similar to when making
+./members.js- *                                                    a request for a single member).
+./members.js-
+./members.js- * @apiSuccess {Array} data An array of members, sorted by _id
+--
+./members.js-  middlewares: [authWithHeaders()],
+./members.js-  handler: handleGetMembersForChallenge,
+./members.js-};
+./members.js-
+./members.js-/**
+./members.js: * @api {get} /api/v3/challenges/:challengeId/members/:memberId Get a challenge member progress
+./members.js: * @apiName GetChallengeMemberProgress
+./members.js- * @apiGroup Member
+./members.js- *
+./members.js: * @apiParam (Path) {UUID} challengeId The challenge _id
+./members.js: * @apiParam (Path) {UUID} memberId The member _id
+./members.js- *
+./members.js- * @apiSuccess {Object} data Return an object with member _id, profile.name
+./members.js- *                           and a tasks object with the challenge tasks for the member.
+./members.js- *
+./members.js- * @apiSuccessExample {json} Success-Response:
+--
+./members.js-    res.respond(200, response);
+./members.js-  },
+./members.js-};
+./members.js-
+./members.js-/**
+./members.js: * @api {get} /api/v3/members/:toUserId/objections/:interaction Get objections to interaction
+./members.js: * @apiDescription Get any objections that would occur
+./members.js- * if the given interaction was attempted - BETA.
+./members.js- *
+./members.js- * @apiVersion 3.0.0
+./members.js: * @apiName GetObjectionsToInteraction
+./members.js- * @apiGroup Member
+./members.js- *
+./members.js: * @apiParam (Path) {UUID} toUserId The user to interact with
+./members.js: * @apiParam (Path) {String="send-private-message","transfer-gems"} interaction Name of the
+./members.js- *                                                                              interaction
+./members.js- *                                                                              to query.
+./members.js- *
+./members.js- * @apiSuccess {Array} data Return an array of objections,
+./members.js- *                          if the interaction would be blocked; otherwise an empty array.
+--
+./members.js-    res.respond(200, response.map(res.t));
+./members.js-  },
+./members.js-};
+./members.js-
+./members.js-/**
+./members.js: * @api {post} /api/v3/members/send-private-message Send a private message to a member
+./members.js: * @apiName SendPrivateMessage
+./members.js- * @apiGroup Member
+./members.js- *
+./members.js: * @apiParam (Body) {String} message The message
+./members.js: * @apiParam (Body) {UUID} toUserId The id of the user to contact
+./members.js- *
+./members.js- * @apiSuccess {Object} data.message The message just sent
+./members.js- *
+./members.js- * @apiUse UserNotFound
+./members.js- */
+--
+./members.js-    res.respond(200, { message: messageSent });
+./members.js-  },
+./members.js-};
+./members.js-
+./members.js-/**
+./members.js: * @api {post} /api/v3/members/transfer-gems Send a gem gift to a member
+./members.js: * @apiName TransferGems
+./members.js- * @apiGroup Member
+./members.js- *
+./members.js: * @apiParam (Body) {String} message The message to the user
+./members.js: * @apiParam (Body) {UUID} toUserId The user to send the gift to
+./members.js: * @apiParam (Body) {Integer} gemAmount The number of gems to send
+./members.js- *
+./members.js- * @apiSuccess {Object} data An empty Object
+./members.js- *
+./members.js- * @apiUse UserNotFound
+./members.js- */
+--
+./webhook.js- * @apiError (400) {BadRequest} WebhookBodyInvalid A body parameter passed in the
+./webhook.js- *                                                 request did not pass validation.
+./webhook.js- */
+./webhook.js-
+./webhook.js-/**
+./webhook.js: * @api {post} /api/v3/user/webhook Create a new webhook - BETA
+./webhook.js: * @apiName AddWebhook
+./webhook.js- * @apiGroup Webhook
+./webhook.js- *
+./webhook.js: * @apiParam (Body) {UUID} [id="Randomly Generated UUID"] The webhook's id
+./webhook.js: * @apiParam (Body) {String} url The webhook's URL
+./webhook.js: * @apiParam (Body) {String} [label] A label to remind you what this webhook does
+./webhook.js: * @apiParam (Body) {Boolean} [enabled=true] If the webhook should be enabled
+./webhook.js: * @apiParam (Body) {String="taskActivity","groupChatReceived",
+./webhook.js-                    "userActivity","questActivity"} [type="taskActivity"] The webhook's type.
+./webhook.js: * @apiParam (Body) {Object} [options] The webhook's options. Will differ depending on type.
+./webhook.js- *                                     Required for `groupChatReceived` type.
+./webhook.js- *                                     If a webhook supports options, the default values
+./webhook.js- *                                     are displayed in the examples below
+./webhook.js: * @apiParamExample {json} Task Activity Example
+./webhook.js- *   {
+./webhook.js- *     "enabled": true, // default
+./webhook.js- *     "url": "https://some-webhook-url.com",
+./webhook.js- *     "label": "My Webhook",
+./webhook.js- *     "type": "taskActivity", // default
+--
+./webhook.js- *       "updated": false, // default
+./webhook.js- *       "deleted": false, // default
+./webhook.js- *       "scored": true // default
+./webhook.js- *     }
+./webhook.js- *   }
+./webhook.js: * @apiParamExample {json} Group Chat Received Example
+./webhook.js- *   {
+./webhook.js- *     "enabled": true,
+./webhook.js- *     "url": "https://some-webhook-url.com",
+./webhook.js- *     "label": "My Chat Webhook",
+./webhook.js- *     "type": "groupChatReceived",
+./webhook.js- *     "options": {
+./webhook.js- *       "groupId": "required-uuid-of-group"
+./webhook.js- *     }
+./webhook.js- *   }
+./webhook.js: * @apiParamExample {json} User Activity Example
+./webhook.js- *   {
+./webhook.js- *     "enabled": true,
+./webhook.js- *     "url": "https://some-webhook-url.com",
+./webhook.js- *     "label": "My Activity Webhook",
+./webhook.js- *     "type": "userActivity",
+--
+./webhook.js- *       "petHatched": false,  // default
+./webhook.js- *       "mountRaised": false, // default
+./webhook.js- *       "leveledUp": false,   // default
+./webhook.js- *     }
+./webhook.js- *   }
+./webhook.js: * @apiParamExample {json} Quest Activity Example
+./webhook.js- *   {
+./webhook.js- *     "enabled": true,
+./webhook.js- *     "url": "https://some-webhook-url.com",
+./webhook.js- *     "label": "My Quest Webhook",
+./webhook.js- *     "type": "questActivity",
+--
+./webhook.js- *       "questStarted": false,  // default
+./webhook.js- *       "questFinished": false, // default
+./webhook.js- *       "questInvited": false,  // default
+./webhook.js- *     }
+./webhook.js- *   }
+./webhook.js: * @apiParamExample {json} Minimal Example
+./webhook.js- *   {
+./webhook.js- *     "url": "https://some-webhook-url.com"
+./webhook.js- *   }
+./webhook.js- *
+./webhook.js- * @apiSuccess (201) {Object} data The created webhook
+--
+./webhook.js-    res.respond(201, webhook);
+./webhook.js-  },
+./webhook.js-};
+./webhook.js-
+./webhook.js-/**
+./webhook.js: * @api {get} /api/v3/user/webhook Get webhooks
+./webhook.js: * @apiName UserGetWebhook
+./webhook.js- * @apiGroup Webhook
+./webhook.js- *
+./webhook.js- * @apiSuccess {Array} data User's webhooks
+./webhook.js- */
+./webhook.js-api.getWebhook = {
+--
+./webhook.js-    res.respond(200, user.webhooks);
+./webhook.js-  },
+./webhook.js-};
+./webhook.js-
+./webhook.js-/**
+./webhook.js: * @api {put} /api/v3/user/webhook/:id Edit a webhook - BETA
+./webhook.js: * @apiName UserUpdateWebhook
+./webhook.js- * @apiGroup Webhook
+./webhook.js: * @apiDescription Can change `url`, `enabled`, `type`, and `options`
+./webhook.js- * properties. Cannot change `id`.
+./webhook.js- *
+./webhook.js: * @apiParam (Path) {UUID} id URL parameter - The id of the webhook to update
+./webhook.js: * @apiParam (Body) {String} [url] The webhook's URL
+./webhook.js: * @apiParam (Body) {String} [label] A label to remind you what this webhook does
+./webhook.js: * @apiParam (Body) {Boolean} [enabled] If the webhook should be enabled
+./webhook.js: * @apiParam (Body) {String="taskActivity","groupChatReceived",
+./webhook.js- *                  "userActivity","questActivity"} [type] The webhook's type.
+./webhook.js: * @apiParam (Body) {Object} [options] The webhook's options. Will differ depending on type.
+./webhook.js- *                                     The options are enumerated in the
+./webhook.js- *                                     [add webhook examples](#api-Webhook-UserAddWebhook).
+./webhook.js: * @apiParamExample {json} Update Enabled and Type Properties
+./webhook.js- *   {
+./webhook.js- *     "enabled": false,
+./webhook.js- *     "type": "taskActivity"
+./webhook.js- *   }
+./webhook.js: * @apiParamExample {json} Update Group Id for Group Chat Receieved Webhook
+./webhook.js- *   {
+./webhook.js- *     "options": {
+./webhook.js- *       "groupId": "new-uuid-of-group"
+./webhook.js- *     }
+./webhook.js- *   }
+--
+./webhook.js-    res.respond(200, webhook);
+./webhook.js-  },
+./webhook.js-};
+./webhook.js-
+./webhook.js-/**
+./webhook.js:* @api {delete} /api/v3/user/webhook/:id Delete a webhook - BETA
+./webhook.js:* @apiName UserDeleteWebhook
+./webhook.js-* @apiGroup Webhook
+./webhook.js-*
+./webhook.js:* @apiParam (Path) {UUID} id The id of the webhook to delete
+./webhook.js-*
+./webhook.js-* @apiSuccess {Array} data The remaining webhooks for the user
+./webhook.js-* @apiUse WebhookNotFound
+./webhook.js-*/
+./webhook.js-api.deleteWebhook = {
+--
+./user/spells.js-const api = {};
+./user/spells.js-
+./user/spells.js-/* NOTE this route has also an API v4 version */
+./user/spells.js-
+./user/spells.js-/**
+./user/spells.js: * @api {post} /api/v3/user/class/cast/:spellId Cast a skill (spell) on a target
+./user/spells.js: * @apiName UserCast
+./user/spells.js- * @apiGroup User
+./user/spells.js- *
+./user/spells.js-
+./user/spells.js: * @apiParam (Path) {String=fireball, mpheal, earth, frost, smash, defensiveStance,
+./user/spells.js- *                  valorousPresence, intimidate, pickPocket, backStab, toolsOfTrade,
+./user/spells.js- *                  stealth, heal, protectAura, brightness, healAll,
+./user/spells.js- *                  snowball, spookySparkles, seafoam, shinySeed} spellId The skill to cast.
+./user/spells.js: * @apiParam (Query) {UUID} targetId Query parameter, necessary if the spell is
+./user/spells.js- *                                   cast on a party member or task. Not used if the spell
+./user/spells.js- *                                   is casted on the user or the user's current party.
+./user/spells.js: * @apiParamExample {json} Query example:
+./user/spells.js- * Cast "Pickpocket" on a task:
+./user/spells.js- *  https://habitica.com/api/v3/user/class/cast/pickPocket?targetId=fd427623...
+./user/spells.js- *
+./user/spells.js- * Cast "Tools of the Trade" on the party:
+./user/spells.js- *  https://habitica.com/api/v3/user/class/cast/toolsOfTrade
+./user/spells.js- *
+./user/spells.js- * @apiSuccess data Will return the modified targets. For party members only
+./user/spells.js- *                  the necessary fields will be populated. The user is always returned.
+./user/spells.js- *
+./user/spells.js: * @apiDescription Skill Key to Name Mapping
+./user/spells.js- *
+./user/spells.js- * Mage:
+./user/spells.js- * fireball="Burst of Flames",
+./user/spells.js- * mpheal="Ethereal Surge",
+./user/spells.js- * earth="Earthquake",
+--
+./user/stats.js-import { authWithHeaders } from '../../../middlewares/auth';
+./user/stats.js-
+./user/stats.js-const api = {};
+./user/stats.js-
+./user/stats.js-/**
+./user/stats.js: * @api {post} /api/v3/user/allocate
+./user/stats.js- * Allocate a single Stat Point (previously called Attribute Point)
+./user/stats.js: * @apiName UserAllocate
+./user/stats.js- * @apiGroup User
+./user/stats.js: * @apiDescription Allocates a single Stat Point.
+./user/stats.js- *
+./user/stats.js: * @apiParam (Query) {String="str","con","int","per"} stat The Stat to increase. Default is 'str'
+./user/stats.js- *
+./user/stats.js: * @apiParamExample {curl} Example call:
+./user/stats.js- * curl -X POST -d "" https://habitica.com/api/v3/user/allocate?stat=int
+./user/stats.js- *
+./user/stats.js- * @apiSuccess {Object} data Returns stats and notifications from the user profile
+./user/stats.js- *
+./user/stats.js- * @apiError {NotAuthorized} NoPoints You don't have enough Stat Points.
+--
+./user/stats.js-    res.respond(200, ...allocateRes);
+./user/stats.js-  },
+./user/stats.js-};
+./user/stats.js-
+./user/stats.js-/**
+./user/stats.js: * @api {post} /api/v3/user/allocate-bulk Allocate multiple Stat Points
+./user/stats.js: * @apiName UserAllocateBulk
+./user/stats.js- * @apiGroup User
+./user/stats.js- *
+./user/stats.js: * @apiParam (Body) { Object } stats Body parameter
+./user/stats.js- *
+./user/stats.js: * @apiParamExample {json} Example request
+./user/stats.js- * {
+./user/stats.js- *  stats: {
+./user/stats.js- *    "int": int,
+./user/stats.js- *    "str": str,
+./user/stats.js- *    "con": con,
+--
+./user/stats.js-    res.respond(200, ...allocateRes);
+./user/stats.js-  },
+./user/stats.js-};
+./user/stats.js-
+./user/stats.js-/**
+./user/stats.js: * @api {post} /api/v3/user/allocate-now Allocate all Stat Points
+./user/stats.js: * @apiDescription Uses the user's chosen automatic allocation method,
+./user/stats.js- * or if none, assigns all to STR. Note: will return success,
+./user/stats.js- * even if there are 0 points to allocate.
+./user/stats.js: * @apiName UserAllocateNow
+./user/stats.js- * @apiGroup User
+./user/stats.js- *
+./user/stats.js- * @apiSuccessExample {json} Success-Response:
+./user/stats.js- *  {
+./user/stats.js- *   "success": true,
+--
+./tasks.js- */
+./tasks.js-
+./tasks.js-const api = {};
+./tasks.js-
+./tasks.js-/**
+./tasks.js: * @api {post} /api/v3/tasks/user Create a new task belonging to the user
+./tasks.js: * @apiDescription Can be passed an object to create a single task or an array of objects
+./tasks.js- * to create multiple tasks.
+./tasks.js: * @apiName CreateUserTasks
+./tasks.js- * @apiGroup Task
+./tasks.js- *
+./tasks.js: * @apiParam (Body) {String} text The text to be displayed for the task
+./tasks.js: * @apiParam (Body) {String="habit","daily","todo","reward"} type Task type, options are: "habit",
+./tasks.js- *                                                                "daily", "todo", "reward".
+./tasks.js: * @apiParam (Body) {String[]} [tags] Array of UUIDs of tags
+./tasks.js: * @apiParam (Body) {String} [alias] Alias to assign to task
+./tasks.js: * @apiParam (Body) {String="str","int","per","con"} [attribute] User's attribute to use,
+./tasks.js- *                                                               options are: "str", "int",
+./tasks.js- *                                                               "per", "con"
+./tasks.js: * @apiParam (Body) {Array} [checklist] An array of checklist items. For example,
+./tasks.js- *                                      [{"text":"buy tools", "completed":true},
+./tasks.js- *                                       {"text":"build shed", "completed":false}]
+./tasks.js: * @apiParam (Body) {Boolean} [collapseChecklist=false] Determines if a checklist will be displayed
+./tasks.js: * @apiParam (Body) {String} [notes] Extra notes
+./tasks.js: * @apiParam (Body) {Date} [date] Due date to be shown in task list. Only valid for type "todo."
+./tasks.js: * @apiParam (Body) {Number="0.1","1","1.5","2"} [priority=1] Difficulty, options are 0.1, 1,
+./tasks.js- *                                                            1.5, 2; equivalent of Trivial,
+./tasks.js- *                                                            Easy, Medium, Hard.
+./tasks.js: * @apiParam (Body) {String[]} [reminders] Array of reminders, each an object that must
+./tasks.js- *                                         include: a UUID, startDate and time.
+./tasks.js- *                                         For example {"id":"ed427623-9a69-4aac-9852-13deb9c190c3",
+./tasks.js- *                                         "startDate":"1/16/17","time":"1/16/17" }
+./tasks.js: * @apiParam (Body) {String="daily","weekly","monthly","yearly"} [frequency=weekly] Values "weekly"
+./tasks.js- *                                           and "monthly" enable use of the "repeat" field.
+./tasks.js- *                                           All frequency values enable use of the "everyX" field.
+./tasks.js- *                                           Value "monthly" enables use of the "weeksOfMonth" and
+./tasks.js- *                                           "daysOfMonth" fields.
+./tasks.js- *                                           Frequency is only valid for type "daily".
+./tasks.js: * @apiParam (Body) {String} [repeat=true] List of objects for days of the week,
+./tasks.js- *                                         Days that are true will be repeated upon.
+./tasks.js- *                                         Only valid for type "daily". Any days not specified
+./tasks.js- *                                         will be marked as true. Days are: su, m, t, w, th,
+./tasks.js- *                                         f, s. Value of frequency must be "weekly".
+./tasks.js- *                                         For example, to skip repeats on Mon and
+./tasks.js- *                                         Fri: "repeat":{"f":false,"m":false}
+./tasks.js: * @apiParam (Body) {Number} [everyX=1] Value of frequency must be "daily",
+./tasks.js- *                                      the number of days until this daily
+./tasks.js- *                                      task is available again.
+./tasks.js: * @apiParam (Body) {Number} [streak=0] Number of days that the task has consecutively
+./tasks.js- *                                      been checked off. Only valid for type "daily"
+./tasks.js: * @apiParam (Body) {Integer[]} daysOfMonth Array of integers.
+./tasks.js- *                                      Only valid for type "daily"
+./tasks.js: * @apiParam (Body) {Integer[]} weeksOfMonth Array of integers.
+./tasks.js- *                                      Only valid for type "daily"
+./tasks.js: * @apiParam (Body) {Date} [startDate] Date when the task will first become available.
+./tasks.js- *                                     Only valid for type "daily"
+./tasks.js: * @apiParam (Body) {Boolean} [up=true] Only valid for type "habit"
+./tasks.js- *                                      If true, enables the "+" under "Directions/Action"
+./tasks.js- *                                      for "Good habits"-
+./tasks.js: * @apiParam (Body) {Boolean} [down=true] Only valid for type "habit" If true, enables
+./tasks.js- *                                        the "-" under "Directions/Action" for "Bad habits"
+./tasks.js: * @apiParam (Body) {Number} [value=0] Only valid for type "reward." The cost
+./tasks.js- *                                     in gold of the reward. Should be greater then or equal to 0.
+./tasks.js- *
+./tasks.js: * @apiParamExample {json} Request-Example:
+./tasks.js- *     {
+./tasks.js- *       "text":"Update Habitica API Documentation - Tasks",
+./tasks.js- *       "type":"todo",
+./tasks.js- *       "alias":"hab-api-tasks",
+./tasks.js- *       "notes":"Update the tasks api on GitHub",
+--
+./tasks.js-    });
+./tasks.js-  },
+./tasks.js-};
+./tasks.js-
+./tasks.js-/**
+./tasks.js: * @api {post} /api/v3/tasks/challenge/:challengeId Create a new task belonging to a challenge
+./tasks.js: * @apiDescription Can be passed an object to create a single task or an
+./tasks.js- * array of objects to create multiple tasks.
+./tasks.js: * @apiName CreateChallengeTasks
+./tasks.js- * @apiGroup Task
+./tasks.js- *
+./tasks.js: * @apiParam (Path) {UUID} challengeId The id of the challenge the new task(s) will belong to
+./tasks.js- *
+./tasks.js: * @apiParam (Body) {String} text The text to be displayed for the task
+./tasks.js: * @apiParam (Body) {String="habit","daily","todo","reward"} type Task type, options are: "habit",
+./tasks.js- *                                                                "daily", "todo", "reward".
+./tasks.js: * @apiParam (Body) {String="str","int","per","con"} [attribute] User's attribute to use,
+./tasks.js- *                                                               options are: "str",
+./tasks.js- *                                                               "int", "per", "con".
+./tasks.js: * @apiParam (Body) {Boolean} [collapseChecklist=false] Determines if a checklist will be displayed
+./tasks.js: * @apiParam (Body) {String} [notes] Extra notes
+./tasks.js: * @apiParam (Body) {Date} [date] Due date to be shown in task list. Only valid for type "todo."
+./tasks.js: * @apiParam (Body) {Number="0.1","1","1.5","2"} [priority=1] Difficulty, options are 0.1, 1,
+./tasks.js- *                                                            1.5, 2; equivalent of Trivial,
+./tasks.js- *                                                            Easy, Medium, Hard.
+./tasks.js: * @apiParam (Body) {String[]} [reminders] Array of reminders, each an object that must
+./tasks.js- *                                         include: a UUID, startDate and time.
+./tasks.js- *                                         For example {"id":"ed427623-9a69-4aac-9852-13deb9c190c3",
+./tasks.js- *                                         "startDate":"1/16/17","time":"1/16/17" }
+./tasks.js: * @apiParam (Body) {String="daily","weekly","monthly","yearly"} [frequency=weekly] Values "weekly"
+./tasks.js- *                                           and "monthly" enable use of the "repeat" field.
+./tasks.js- *                                           All frequency values enable use of the "everyX" field.
+./tasks.js- *                                           Value "monthly" enables use of the "weeksOfMonth" and
+./tasks.js- *                                           "daysOfMonth" fields.
+./tasks.js- *                                           Frequency is only valid for type "daily".
+./tasks.js: * @apiParam (Body) {String} [repeat=true] List of objects for days of the week,
+./tasks.js- *                                         Days that are true will be repeated upon.
+./tasks.js- *                                         Only valid for type "daily". Any days not
+./tasks.js- *                                         specified will be marked as true. Days are:
+./tasks.js- *                                         su, m, t, w, th, f, s. Value of frequency must
+./tasks.js- *                                         be "weekly". For example, to skip repeats on
+./tasks.js- *                                         Mon and Fri: "repeat":{"f":false,"m":false}
+./tasks.js: * @apiParam (Body) {Number} [everyX=1] Value of frequency must be "daily", the number
+./tasks.js- *                                      of days until this daily task is available again.
+./tasks.js: * @apiParam (Body) {Number} [streak=0] Number of days that the task has consecutively
+./tasks.js- *                                      been checked off. Only valid for type "daily"
+./tasks.js: * @apiParam (Body) {Integer[]} daysOfMonth Array of integers.
+./tasks.js- *                                      Only valid for type "daily"
+./tasks.js: * @apiParam (Body) {Integer[]} weeksOfMonth Array of integers.
+./tasks.js- *                                      Only valid for type "daily"
+./tasks.js: * @apiParam (Body) {Date} [startDate] Date when the task will first become available.
+./tasks.js- *                                     Only valid for type "daily"
+./tasks.js: * @apiParam (Body) {Boolean} [up=true] Only valid for type "habit" If true,
+./tasks.js- *                                      enables the "+" under "Directions/Action"
+./tasks.js- *                                      for "Good habits"
+./tasks.js: * @apiParam (Body) {Boolean} [down=true] Only valid for type "habit" If true, enables
+./tasks.js- *                                        the "-" under "Directions/Action" for "Bad habits"
+./tasks.js: * @apiParam (Body) {Number} [value=0] Only valid for type "reward." The cost in gold of the reward
+./tasks.js- *
+./tasks.js: * @apiParamExample {json} Request-Example:
+./tasks.js- * {"type":"todo","text":"Test API Params"}
+./tasks.js- *
+./tasks.js- * @apiSuccess (201) data An object if a single task was created, otherwise an array of tasks
+./tasks.js- *
+./tasks.js- * @apiSuccessExample {json} Example return:
+--
+./tasks.js-    });
+./tasks.js-  },
+./tasks.js-};
+./tasks.js-
+./tasks.js-/**
+./tasks.js: * @api {get} /api/v3/tasks/user Get a user's tasks
+./tasks.js: * @apiName GetUserTasks
+./tasks.js- * @apiGroup Task
+./tasks.js- *
+./tasks.js: * @apiParam (Query) {String="habits","dailys",
+./tasks.js- *                   "todos","rewards","completedTodos"} type Optional query parameter to return
+./tasks.js- *                                                            just a type of tasks. By default all
+./tasks.js- *                                                            types will be returned except
+./tasks.js- *                                                            completed todos that must be
+./tasks.js- *                                                            requested separately.
+./tasks.js- *                                                            The "completedTodos" type returns
+./tasks.js- *                                                            only the 30 most recently completed.
+./tasks.js: * @apiParam (Query) [dueDate] type Optional date to use for computing the nextDue field
+./tasks.js- *                                  for each returned task.
+./tasks.js- *
+./tasks.js- * @apiSuccess {Array} data An array of tasks
+./tasks.js- *
+./tasks.js- * @apiSuccessExample {json} Example return:
+--
+./tasks.js-    return res.respond(200, tasks);
+./tasks.js-  },
+./tasks.js-};
+./tasks.js-
+./tasks.js-/**
+./tasks.js: * @api {get} /api/v3/tasks/challenge/:challengeId Get a challenge's tasks
+./tasks.js: * @apiName GetChallengeTasks
+./tasks.js- * @apiGroup Task
+./tasks.js- *
+./tasks.js: * @apiParam (Path) {UUID} challengeId The id of the challenge from which to retrieve the tasks
+./tasks.js: * @apiParam (Query) {String="habits","dailys","todos","rewards"} [type] Query parameter to return
+./tasks.js- *                                                                       just a type of tasks.
+./tasks.js- *
+./tasks.js- * @apiExample {curl} Example use:
+./tasks.js- * curl -i https://habitica.com/api/v3/tasks/challenge/f23c12f2-5830-4f15-9c36-e17fd729a812
+./tasks.js- *
+--
+./tasks.js-    return res.respond(200, tasks);
+./tasks.js-  },
+./tasks.js-};
+./tasks.js-
+./tasks.js-/**
+./tasks.js: * @api {get} /api/v3/tasks/:taskId Get a task
+./tasks.js: * @apiName GetTask
+./tasks.js- * @apiGroup Task
+./tasks.js- *
+./tasks.js: * @apiParam (Path) {String} taskId The task _id or alias
+./tasks.js- *
+./tasks.js- * @apiExample {curl} Example use:
+./tasks.js- * curl -i https://habitica.com/api/v3/tasks/54a81d23-529c-4daa-a6f7-c5c6e7e84936
+./tasks.js- *
+./tasks.js- * @apiSuccess {Object} data The task object
+--
+./tasks.js-    res.respond(200, task);
+./tasks.js-  },
+./tasks.js-};
+./tasks.js-
+./tasks.js-/**
+./tasks.js: * @api {put} /api/v3/tasks/:taskId Update a task
+./tasks.js: * @apiName UpdateTask
+./tasks.js- * @apiGroup Task
+./tasks.js- *
+./tasks.js: * @apiParam (Path) {String} taskId The task _id or alias
+./tasks.js- *
+./tasks.js: * @apiParam (Body) {String} [text] The text to be displayed for the task
+./tasks.js: * @apiParam (Body) {String="str","int","per","con"} [attribute] User's attribute to use,
+./tasks.js- *                                                               options are: "str", "int",
+./tasks.js- *                                                               "per", "con".
+./tasks.js: * @apiParam (Body) {Boolean} [collapseChecklist=false] Determines if a checklist will be displayed
+./tasks.js: * @apiParam (Body) {String} [notes] Extra notes
+./tasks.js: * @apiParam (Body) {Date} [date] Due date to be shown in task list. Only valid for type "todo."
+./tasks.js: * @apiParam (Body) {Number="0.1","1","1.5","2"} [priority=1] Difficulty, options are 0.1, 1,
+./tasks.js- *                                                            1.5, 2; equivalent of Trivial,
+./tasks.js- *                                                            Easy, Medium, Hard.
+./tasks.js: * @apiParam (Body) {String[]} [reminders] Array of reminders, each an object that must include:
+./tasks.js- *                                         a UUID, startDate and time.
+./tasks.js: * @apiParam (Body) {String="daily","weekly","monthly","yearly"} [frequency=weekly] Values "weekly"
+./tasks.js- *                                           and "monthly" enable use of the "repeat" field.
+./tasks.js- *                                           All frequency values enable use of the "everyX" field.
+./tasks.js- *                                           Value "monthly" enables use of the "weeksOfMonth" and
+./tasks.js- *                                           "daysOfMonth" fields.
+./tasks.js- *                                           Frequency is only valid for type "daily".
+./tasks.js: * @apiParam (Body) {String} [repeat=true] List of objects for days of the week,  Days that
+./tasks.js- *                                         are true will be repeated upon. Only valid for type
+./tasks.js- *                                         "daily". Any days not specified will be marked as true.
+./tasks.js- *                                         Days are: su, m, t, w, th, f, s. Value of frequency must
+./tasks.js- *                                         be "weekly". For example, to skip repeats on Mon and Fri:
+./tasks.js- *                                         "repeat":{"f":false,"m":false}
+./tasks.js: * @apiParam (Body) {Number} [everyX=1] Value of frequency must be "daily", the number
+./tasks.js- *                                      of days until this daily task is available again.
+./tasks.js: * @apiParam (Body) {Number} [streak=0] Number of days that the task has consecutively
+./tasks.js- *                                      been checked off. Only valid for type "daily",
+./tasks.js: * @apiParam (Body) {Integer[]} daysOfMonth Array of integers.
+./tasks.js- *                                      Only valid for type "daily"
+./tasks.js: * @apiParam (Body) {Integer[]} weeksOfMonth Array of integers.
+./tasks.js- *                                      Only valid for type "daily"
+./tasks.js: * @apiParam (Body) {Date} [startDate] Date when the task will first become available.
+./tasks.js- *                                     Only valid for type "daily".
+./tasks.js: * @apiParam (Body) {Boolean} [up=true] Only valid for type "habit" If true, enables
+./tasks.js- *                                      the "+" under "Directions/Action" for "Good habits".
+./tasks.js: * @apiParam (Body) {Boolean} [down=true] Only valid for type "habit" If true, enables the
+./tasks.js- *                                        "-" under "Directions/Action" for "Bad habits".
+./tasks.js: * @apiParam (Body) {Number} [value=0] Only valid for type "reward." The cost in gold of the reward
+./tasks.js- *
+./tasks.js: * @apiParamExample {json} Request-Example:
+./tasks.js- * {"notes":"This will be replace the notes, anything not specified will remain the same"}
+./tasks.js- *
+./tasks.js- * @apiSuccess {Object} data The updated task
+./tasks.js- *
+./tasks.js- * @apiUse TaskNotFound
+--
+./tasks.js-    }
+./tasks.js-  },
+./tasks.js-};
+./tasks.js-
+./tasks.js-/**
+./tasks.js: * @api {post} /api/v3/tasks/:taskId/score/:direction Score a task
+./tasks.js: * @apiName ScoreTask
+./tasks.js- * @apiGroup Task
+./tasks.js- *
+./tasks.js: * @apiParam (Path) {String} taskId The task _id or alias
+./tasks.js: * @apiParam (Path) {String="up","down"} direction The direction for scoring the task
+./tasks.js- *
+./tasks.js- * @apiExample {json} Example call:
+./tasks.js- * curl -X "POST" https://habitica.com/api/v3/tasks/test-api-params/score/up
+./tasks.js- *
+./tasks.js- * @apiSuccess {Object} data The user stats
+--
+./tasks.js-    res.respond(200, resJsonData);
+./tasks.js-  },
+./tasks.js-};
+./tasks.js-
+./tasks.js-/**
+./tasks.js: * @api {post} /api/v3/tasks/:taskId/move/to/:position Move a task to a new position
+./tasks.js: * @apiDescription Note: completed To Do's are not sortable,
+./tasks.js- * do not appear in user.tasksOrder.todos, and are ordered by date of completion.
+./tasks.js: * @apiName MoveTask
+./tasks.js- * @apiGroup Task
+./tasks.js- *
+./tasks.js: * @apiParam (Path) {String} taskId The task _id or alias
+./tasks.js: * @apiParam (Path) {Number} position Where to move the task.
+./tasks.js- *                                    0 = top of the list ("push to top").
+./tasks.js- *                                   -1 = bottom of the list ("push to bottom").
+./tasks.js- *
+./tasks.js- * @apiSuccess {Array} data The new tasks order for the specific type that the taskID belongs to.
+./tasks.js- *
+--
+./tasks.js-    res.respond(200, order);
+./tasks.js-  },
+./tasks.js-};
+./tasks.js-
+./tasks.js-/**
+./tasks.js: * @api {post} /api/v3/tasks/:taskId/checklist Add an item to the task's checklist
+./tasks.js: * @apiName AddChecklistItem
+./tasks.js- * @apiGroup Task
+./tasks.js- *
+./tasks.js: * @apiParam (Path) {String} taskId The task _id or alias
+./tasks.js- *
+./tasks.js: * @apiParam (Body) {String} text The text of the checklist item
+./tasks.js: * @apiParam (Body) {Boolean} [completed=false] Whether the checklist item is checked off.
+./tasks.js- *
+./tasks.js: * @apiParamExample {json} Example body data:
+./tasks.js- * {"text":"Do this subtask"}
+./tasks.js- *
+./tasks.js- * @apiSuccess {Object} data The updated task
+./tasks.js- *
+./tasks.js- * @apiSuccessExample {json} Example return:
+--
+./tasks.js-    if (challenge) challenge.updateTask(savedTask);
+./tasks.js-  },
+./tasks.js-};
+./tasks.js-
+./tasks.js-/**
+./tasks.js: * @api {post} /api/v3/tasks/:taskId/checklist/:itemId/score Score a checklist item
+./tasks.js: * @apiName ScoreChecklistItem
+./tasks.js- * @apiGroup Task
+./tasks.js- *
+./tasks.js: * @apiParam (Path) {String} taskId The task _id or alias
+./tasks.js: * @apiParam (Path) {UUID} itemId The checklist item _id
+./tasks.js- *
+./tasks.js- * @apiSuccess {Object} data The updated task
+./tasks.js- *
+./tasks.js- * @apiUse TaskNotFound
+./tasks.js- * @apiUse ChecklistNotFound
+--
+./tasks.js-    });
+./tasks.js-  },
+./tasks.js-};
+./tasks.js-
+./tasks.js-/**
+./tasks.js: * @api {put} /api/v3/tasks/:taskId/checklist/:itemId Update a checklist item
+./tasks.js: * @apiName UpdateChecklistItem
+./tasks.js- * @apiGroup Task
+./tasks.js- *
+./tasks.js: * @apiParam (Path) {String} taskId The task _id or alias
+./tasks.js: * @apiParam (Path) {UUID} itemId The checklist item _id
+./tasks.js- *
+./tasks.js: * @apiParam (Body) {String} text The replacement text for the current checklist item.
+./tasks.js: * @apiParam (Body) {Boolean} [completed=false] Whether the checklist item is checked off.
+./tasks.js- *
+./tasks.js: * @apiParamExample {json} Example body:
+./tasks.js- * {"text":"learn Czech", "completed":true}
+./tasks.js- *
+./tasks.js- * @apiSuccess {Object} data The updated task
+./tasks.js- *
+./tasks.js- * @apiUse TaskNotFound
+--
+./tasks.js-    if (challenge) challenge.updateTask(savedTask);
+./tasks.js-  },
+./tasks.js-};
+./tasks.js-
+./tasks.js-/**
+./tasks.js: * @api {delete} /api/v3/tasks/:taskId/checklist/:itemId Delete a checklist item from a task
+./tasks.js: * @apiName RemoveChecklistItem
+./tasks.js- * @apiGroup Task
+./tasks.js- *
+./tasks.js: * @apiParam (Path) {String} taskId The task _id or alias
+./tasks.js: * @apiParam (Path) {UUID} itemId The checklist item _id
+./tasks.js- *
+./tasks.js- * @apiSuccess {Object} data The updated task
+./tasks.js- *
+./tasks.js- * @apiSuccessExample {json} Example return:
+./tasks.js- * {"success":true,"data":{"_id":"84f02d6a-7b43-4818-a35c-d3336cec4880",
+--
+./tasks.js-    if (challenge) challenge.updateTask(savedTask);
+./tasks.js-  },
+./tasks.js-};
+./tasks.js-
+./tasks.js-/**
+./tasks.js: * @api {post} /api/v3/tasks/:taskId/tags/:tagId Add a tag to a task
+./tasks.js: * @apiName AddTagToTask
+./tasks.js- * @apiGroup Task
+./tasks.js- *
+./tasks.js: * @apiParam (Path) {String} taskId The task _id or alias
+./tasks.js: * @apiParam (Path) {UUID} tagId The tag id
+./tasks.js- *
+./tasks.js- * @apiSuccess {Object} data The updated task
+./tasks.js- *
+./tasks.js- * @apiSuccessExample {json} Example return:
+./tasks.js- * {"success":true,"data":{"_id":"84f02d6a-7b43-4818-a35c-d3336cec4880",
+--
+./tasks.js-    res.respond(200, savedTask);
+./tasks.js-  },
+./tasks.js-};
+./tasks.js-
+./tasks.js-/**
+./tasks.js: * @api {delete} /api/v3/tasks/:taskId/tags/:tagId Delete a tag from a task
+./tasks.js: * @apiName RemoveTagFromTask
+./tasks.js- * @apiGroup Task
+./tasks.js- *
+./tasks.js: * @apiParam (Path) {String} taskId The task _id or alias
+./tasks.js: * @apiParam (Path) {UUID} tagId The tag id
+./tasks.js- *
+./tasks.js- * @apiExample {curl} Example use:
+./tasks.js- * curl -X "DELETE" https://habitica.com/api/v3/tasks/test-api-params/tags/3d5d324d-a042-4d5f-872e-0553e228553e
+./tasks.js- *
+./tasks.js- * @apiSuccess {Object} data The updated task
+--
+./tasks.js-    res.respond(200, savedTask);
+./tasks.js-  },
+./tasks.js-};
+./tasks.js-
+./tasks.js-/**
+./tasks.js: * @api {post} /api/v3/tasks/unlink-all/:challengeId Unlink all tasks from a challenge
+./tasks.js: * @apiName UnlinkAllTasks
+./tasks.js- * @apiGroup Task
+./tasks.js- *
+./tasks.js: * @apiParam (Path) {UUID} challengeId The challenge _id
+./tasks.js: * @apiParam (Query) {String='keep-all','remove-all'} keep Specifies if tasks
+./tasks.js- *                                                         should be kept(keep-all) or
+./tasks.js- *                                                         removed(remove-all) after the unlink.
+./tasks.js- *
+./tasks.js- * @apiExample {curl} Example call:
+./tasks.js- * curl -X "POST" https://habitica.com/api/v3/tasks/unlink-all/f23c12f2-5830-4f15-9c36-e17fd729a812?keep=remove-all
+--
+./tasks.js-    res.respond(200, {});
+./tasks.js-  },
+./tasks.js-};
+./tasks.js-
+./tasks.js-/**
+./tasks.js: * @api {post} /api/v3/tasks/unlink-one/:taskId Unlink a challenge task
+./tasks.js: * @apiName UnlinkOneTask
+./tasks.js- * @apiGroup Task
+./tasks.js- *
+./tasks.js: * @apiParam (Path) {String} taskId The task _id or alias
+./tasks.js: * @apiParam (Query) {String='keep','remove'} keep  Specifies if the task should
+./tasks.js- *                                                  be kept(keep) or removed(remove).
+./tasks.js- *
+./tasks.js- * @apiExample {curl} Example call:
+./tasks.js- * curl -X "POST" https://habitica.com/api/v3/tasks/unlink-one/ee882e1d-ebd1-4716-88f2-4f9e47d947a8?keep=keep
+./tasks.js- *
+--
+./tasks.js-    res.respond(200, {});
+./tasks.js-  },
+./tasks.js-};
+./tasks.js-
+./tasks.js-/**
+./tasks.js: * @api {post} /api/v3/tasks/clearCompletedTodos Delete user's completed todos
+./tasks.js: * @apiName ClearCompletedTodos
+./tasks.js: * @apiDescription Deletes all of a user's completed To Do's except
+./tasks.js- * those belonging to active Challenges and Group Plans.
+./tasks.js- * @apiGroup Task
+./tasks.js- *
+./tasks.js- * @apiExample {curl} Example call:
+./tasks.js- * curl -X "POST" https://habitica.com/api/v3/tasks/ClearCompletedTodos
+--
+./tasks.js-    res.respond(200, {});
+./tasks.js-  },
+./tasks.js-};
+./tasks.js-
+./tasks.js-/**
+./tasks.js: * @api {delete} /api/v3/tasks/:taskId Delete a task
+./tasks.js: * @apiName DeleteTask
+./tasks.js- * @apiGroup Task
+./tasks.js- *
+./tasks.js: * @apiParam (Path) {String} taskId The task _id or alias
+./tasks.js- *
+./tasks.js- * @apiExample {json} Example call:
+./tasks.js- * curl -X "DELETE" https://habitica.com/api/v3/tasks/3d5d324d-a042-4d5f-872e-0553e228553e
+./tasks.js- *
+./tasks.js- * @apiSuccess {Object} data An empty object
+--
+./status.js-} from '../../middlewares/cache';
+./status.js-
+./status.js-const api = {};
+./status.js-
+./status.js-/**
+./status.js: * @api {get} /api/v3/status Get Habitica's API status
+./status.js: * @apiName GetStatus
+./status.js- * @apiGroup Status
+./status.js- *
+./status.js- * @apiSuccess {String} data.status 'up' if everything is ok
+./status.js- *
+./status.js- * @apiSuccessExample {JSON} Server is Up
+--
+./news.js-const worldDmg = { // @TODO
+./news.js-  bailey: false,
+./news.js-};
+./news.js-
+./news.js-/**
+./news.js: * @api {get} /api/v3/news Get latest Bailey announcement
+./news.js: * @apiName GetNews
+./news.js- * @apiGroup News
+./news.js- *
+./news.js- *
+./news.js- * @apiSuccess {Object} html Latest Bailey html
+./news.js- *
+--
+./news.js-    }
+./news.js-  },
+./news.js-};
+./news.js-
+./news.js-/**
+./news.js: * @api {post} /api/v3/news/tell-me-later Allow latest Bailey announcement to be read later
+./news.js: * @apiName TellMeLaterNews
+./news.js: * @apiDescription Add a notification to allow viewing of the latest "New Stuff by Bailey" message.
+./news.js- * Prevent this specific Bailey message from appearing automatically.
+./news.js- * @apiGroup News
+./news.js- *
+./news.js- * @apiSuccess {Object} data An empty Object
+./news.js- *
+--
+./challenges.js-   }]
+./challenges.js- }
+./challenges.js-*/
+./challenges.js-
+./challenges.js-/**
+./challenges.js: * @api {post} /api/v3/challenges Create a new challenge
+./challenges.js: * @apiName CreateChallenge
+./challenges.js- * @apiGroup Challenge
+./challenges.js: * @apiDescription Creates a challenge. Cannot create associated
+./challenges.js- * tasks with this route. See <a href="#api-Task-CreateChallengeTasks">CreateChallengeTasks</a>.
+./challenges.js- *
+./challenges.js: * @apiParam (Body) {Object} challenge An object representing the challenge to be created
+./challenges.js: * @apiParam (Body) {UUID} challenge.group The id of the group to which the challenge belongs
+./challenges.js: * @apiParam (Body) {String} challenge.name The full name of the challenge
+./challenges.js: * @apiParam (Body) {String} challenge.shortName A shortened name for the challenge,
+./challenges.js- *                                               to be used as a tag.
+./challenges.js: * @apiParam (Body) {String} [challenge.summary] A short summary advertising the main purpose
+./challenges.js- *                                               of the challenge; maximum 250 characters;
+./challenges.js- *                                               if not supplied, challenge.name will be used.
+./challenges.js: * @apiParam (Body) {String} [challenge.description] A detailed description of the challenge
+./challenges.js: * @apiParam (Body) {Boolean} [official=false] Whether or not a challenge is an official
+./challenges.js- *                                             Habitica challenge (requires admin).
+./challenges.js: * @apiParam (Body) {Number} [challenge.prize=0] Number of gems offered as
+./challenges.js- *                                               a prize to challenge winner.
+./challenges.js- *
+./challenges.js- * @apiSuccess (201) {Object} challenge The newly created challenge.
+./challenges.js- * @apiUse SuccessfulChallengeRequest
+./challenges.js- *
+--
+./challenges.js-    res.respond(201, response);
+./challenges.js-  },
+./challenges.js-};
+./challenges.js-
+./challenges.js-/**
+./challenges.js: * @api {post} /api/v3/challenges/:challengeId/join Join a challenge
+./challenges.js: * @apiName JoinChallenge
+./challenges.js- * @apiGroup Challenge
+./challenges.js: * @apiParam (Path) {UUID} challengeId The challenge _id
+./challenges.js- *
+./challenges.js- * @apiSuccess {Object} challenge The challenge the user joined
+./challenges.js- * @apiUse SuccessfulChallengeRequest
+./challenges.js- *
+./challenges.js- * @apiUse ChallengeNotFound
+--
+./challenges.js-    res.respond(200, response);
+./challenges.js-  },
+./challenges.js-};
+./challenges.js-
+./challenges.js-/**
+./challenges.js: * @api {post} /api/v3/challenges/:challengeId/leave Leave a challenge
+./challenges.js: * @apiName LeaveChallenge
+./challenges.js- * @apiGroup Challenge
+./challenges.js: * @apiParam (Path) {UUID} challengeId The challenge _id
+./challenges.js: * @apiParam (Body) {String="remove-all","keep-all"} [keep="keep-all"] Whether or not to
+./challenges.js- *                                                                     keep or remove the
+./challenges.js- *                                                                     challenge's tasks.
+./challenges.js- *
+./challenges.js- * @apiSuccess {Object} data An empty object
+./challenges.js- *
+--
+./challenges.js-    res.respond(200, {});
+./challenges.js-  },
+./challenges.js-};
+./challenges.js-
+./challenges.js-/**
+./challenges.js: * @api {get} /api/v3/challenges/user Get challenges for a user
+./challenges.js: * @apiName GetUserChallenges
+./challenges.js- * @apiGroup Challenge
+./challenges.js: * @apiDescription Get challenges the user has access to. Includes public challenges,
+./challenges.js- * challenges belonging to the user's group, and challenges the user has already joined.
+./challenges.js- * Returns 10 results per page.
+./challenges.js- *
+./challenges.js- * @apiSuccess {Object[]} challenges An array of challenges sorted with official
+./challenges.js- *                                   challenges first, followed by the challenges
+./challenges.js- *                                   in order from newest to oldest.
+./challenges.js- *
+./challenges.js: * @apiParam (Query) {Number} page This parameter can be used to specify the page number
+./challenges.js-                                   for the user challenges result (the initial page is number 0).
+./challenges.js: * @apiParam (Query) {String} [member] If set to `true` it limits results to challenges where the
+./challenges.js-                                       user is a member.
+./challenges.js: * @apiParam (Query) {String} [owned] If set to `owned` it limits results to challenges owned
+./challenges.js-                                      by the user. If set to `not_owned` it limits results
+./challenges.js-                                      to challenges not owned by the user.
+./challenges.js: * @apiParam (Query) {String} [search] Optional query parameter to filter results to challenges
+./challenges.js-                                       that include (even partially) the search query parameter
+./challenges.js-                                       in the name or description.
+./challenges.js: * @apiParam (Query) {String} [categories] Optional comma separated list of categories.
+./challenges.js-                                           If set it limits results to challenges that are part
+./challenges.js-                                           of the given categories.
+./challenges.js- * @apiError (400) {BadRequest} queryPageInteger Page query parameter must be a positive integer
+./challenges.js- * @apiUse SuccessfulChallengeRequest
+./challenges.js- *
+--
+./challenges.js-    res.respond(200, resChals);
+./challenges.js-  },
+./challenges.js-};
+./challenges.js-
+./challenges.js-/**
+./challenges.js: * @api {get} /api/v3/challenges/groups/:groupId Get challenges for a group
+./challenges.js: * @apiDescription Get challenges hosted in the specified group.
+./challenges.js: * @apiName GetGroupChallenges
+./challenges.js- * @apiGroup Challenge
+./challenges.js- *
+./challenges.js: * @apiParam (Path) {UUID} groupId The group id ('party' for the user party and 'habitrpg'
+./challenges.js- *                                 for tavern are accepted)
+./challenges.js- *
+./challenges.js- * @apiSuccess {Array} data An array of challenges sorted with official challenges first,
+./challenges.js- *                          followed by the challenges in order from newest to oldest.
+./challenges.js- *
+--
+./challenges.js-    res.respond(200, resChals);
+./challenges.js-  },
+./challenges.js-};
+./challenges.js-
+./challenges.js-/**
+./challenges.js: * @api {get} /api/v3/challenges/:challengeId Get a challenge
+./challenges.js: * @apiName GetChallenge
+./challenges.js- * @apiGroup Challenge
+./challenges.js- *
+./challenges.js: * @apiParam (Path) {UUID} challengeId The challenge _id
+./challenges.js- *
+./challenges.js- * @apiSuccess {Object} data The challenge object
+./challenges.js- * @apiUse SuccessfulChallengeRequest
+./challenges.js-*  @apiUse ChallengeSuccessExample
+./challenges.js- *
+--
+./challenges.js-    res.respond(200, chalRes);
+./challenges.js-  },
+./challenges.js-};
+./challenges.js-
+./challenges.js-/**
+./challenges.js: * @api {get} /api/v3/challenges/:challengeId/export/csv Export a challenge in CSV
+./challenges.js: * @apiName ExportChallengeCsv
+./challenges.js- * @apiGroup Challenge
+./challenges.js- *
+./challenges.js: * @apiParam (Path) {UUID} challengeId The challenge _id
+./challenges.js- *
+./challenges.js- * @apiSuccess {String} challenge A csv file
+./challenges.js- *
+./challenges.js- * @apiUse ChallengeNotFound
+./challenges.js- */
+--
+./challenges.js-    res.status(200).send(csvRes);
+./challenges.js-  },
+./challenges.js-};
+./challenges.js-
+./challenges.js-/**
+./challenges.js: * @api {put} /api/v3/challenges/:challengeId Update a challenge's name, description, or summary
+./challenges.js- *
+./challenges.js: * @apiName UpdateChallenge
+./challenges.js- * @apiGroup Challenge
+./challenges.js- *
+./challenges.js: * @apiParam (Path) {UUID} challengeId The challenge _id
+./challenges.js: * @apiParam (Body) {String} [challenge.name] The new full name of the challenge.
+./challenges.js: * @apiParam (Body) {String} [challenge.summary] The new challenge summary.
+./challenges.js: * @apiParam (Body) {String} [challenge.description] The new challenge description.
+./challenges.js- *
+./challenges.js- * @apiSuccess {Object} data The updated challenge
+./challenges.js- * @apiPermission ChallengeLeader
+./challenges.js- *
+./challenges.js- * @apiUse ChallengeSuccessExample
+--
+./challenges.js-    res.respond(200, response);
+./challenges.js-  },
+./challenges.js-};
+./challenges.js-
+./challenges.js-/**
+./challenges.js: * @api {delete} /api/v3/challenges/:challengeId Delete a challenge
+./challenges.js: * @apiName DeleteChallenge
+./challenges.js- * @apiGroup Challenge
+./challenges.js- *
+./challenges.js: * @apiParam (Path) {UUID} challengeId The _id for the challenge to delete
+./challenges.js- *
+./challenges.js- * @apiSuccess {Object} data An empty object
+./challenges.js- *
+./challenges.js- * @apiUse ChallengeNotFound
+./challenges.js- */
+--
+./challenges.js-    res.respond(200, {});
+./challenges.js-  },
+./challenges.js-};
+./challenges.js-
+./challenges.js-/**
+./challenges.js: * @api {post} /api/v3/challenges/:challengeId/selectWinner/:winnerId Select winner for challenge
+./challenges.js: * @apiName SelectChallengeWinner
+./challenges.js- * @apiGroup Challenge
+./challenges.js- *
+./challenges.js: * @apiParam (Path) {UUID} challengeId The _id for the challenge to close with a winner
+./challenges.js: * @apiParam (Path) {UUID} winnerId The _id of the winning user
+./challenges.js- *
+./challenges.js- * @apiSuccess {Object} data An empty object
+./challenges.js- *
+./challenges.js- * @apiUse ChallengeNotFound
+./challenges.js- */
+--
+./challenges.js-    res.respond(200, {});
+./challenges.js-  },
+./challenges.js-};
+./challenges.js-
+./challenges.js-/**
+./challenges.js: * @api {post} /api/v3/challenges/:challengeId/clone Clone a challenge
+./challenges.js: * @apiName CloneChallenge
+./challenges.js- * @apiGroup Challenge
+./challenges.js- *
+./challenges.js: * @apiParam (Path) {UUID} challengeId The _id for the challenge to clone
+./challenges.js- *
+./challenges.js- * @apiSuccess {Object} challenge The cloned challenge
+./challenges.js- *
+./challenges.js- * @apiUse ChallengeNotFound
+./challenges.js- */
+--
+./content.js-const IS_PROD = nconf.get('IS_PROD');
+./content.js-
+./content.js-const api = {};
+./content.js-
+./content.js-/**
+./content.js: * @api {get} /api/v3/content Get all available content objects
+./content.js: * @apiDescription Does not require authentication.
+./content.js: * @apiName ContentGet
+./content.js- * @apiGroup Content
+./content.js- *
+./content.js: * @apiParam (Query) {String="bg","cs","da","de",
+./content.js- *                   "en","en@pirate","en_GB",
+./content.js- *                    "es","es_419","fr","he","hu",
+./content.js- *                    "id","it","ja","nl","pl","pt","pt_BR",
+./content.js- *                    "ro","ru","sk","sr","sv",
+./content.js- *                    "uk","zh","zh_TW"} [language=en] Language code used for the items'
+--
+./chat.js-  const bannedSlursMatched = getMatchesByWordArray(message, bannedSlurs);
+./chat.js-  return bannedSlursMatched.length > 0;
+./chat.js-}
+./chat.js-
+./chat.js-/**
+./chat.js: * @api {get} /api/v3/groups/:groupId/chat Get chat messages from a group
+./chat.js: * @apiName GetChat
+./chat.js- * @apiGroup Chat
+./chat.js: * @apiDescription Fetches an array of messages from a group
+./chat.js- *
+./chat.js: * @apiParam (Path) {String} groupId The group _id ('party' for the user party and
+./chat.js- *                                   'habitrpg' for tavern are accepted).
+./chat.js- *
+./chat.js- * @apiSuccess {Array} data An array of <a href='https://github.com/HabitRPG/habitica/blob/develop/website/server/models/group.js#L51' target='_blank'>chat messages</a>
+./chat.js- *
+./chat.js- * @apiUse GroupNotFound
+--
+./chat.js-function getBannedWordsFromText (message) {
+./chat.js-  return getMatchesByWordArray(message, bannedWords);
+./chat.js-}
+./chat.js-
+./chat.js-/**
+./chat.js: * @api {post} /api/v3/groups/:groupId/chat Post chat message to a group
+./chat.js: * @apiName PostChat
+./chat.js- * @apiGroup Chat
+./chat.js: * @apiDescription Posts a chat message to a group
+./chat.js- *
+./chat.js: * @apiParam (Path) {UUID} groupId The group _id ('party' for the user party and 'habitrpg'
+./chat.js- *                                 for tavern are accepted)
+./chat.js: * @apiParam (Body) {String} message Message The message to post
+./chat.js: * @apiParam (Query) {UUID} previousMsg The previous chat message's UUID which will
+./chat.js- *                                      force a return of the full group chat.
+./chat.js- *
+./chat.js- * @apiUse GroupNotFound
+./chat.js- * @apiUse GroupIdRequired
+./chat.js- * @apiError (400) {NotAuthorized} chatPriviledgesRevoked You cannot do that because
+--
+./chat.js-    }
+./chat.js-  },
+./chat.js-};
+./chat.js-
+./chat.js-/**
+./chat.js: * @api {post} /api/v3/groups/:groupId/chat/:chatId/like Like a group chat message
+./chat.js: * @apiName LikeChat
+./chat.js- * @apiGroup Chat
+./chat.js: * @apiDescription Likes a chat message from a group
+./chat.js- *
+./chat.js: * @apiParam (Path) {UUID} groupId The group _id ('party' for the user party and 'habitrpg'
+./chat.js- *                                 for tavern are accepted).
+./chat.js: * @apiParam (Path) {UUID} chatId The chat message _id
+./chat.js- *
+./chat.js- * @apiSuccess {Object} data The liked <a href='https://github.com/HabitRPG/habitica/blob/develop/website/server/models/group.js#L51' target='_blank'>chat message</a>
+./chat.js- *
+./chat.js- * @apiUse GroupNotFound
+./chat.js- * @apiUse MessageNotFound
+--
+./chat.js-    res.respond(200, message); // TODO what if the message is flagged and shouldn't be returned?
+./chat.js-  },
+./chat.js-};
+./chat.js-
+./chat.js-/**
+./chat.js: * @api {post} /api/v3/groups/:groupId/chat/:chatId/flag Flag a group chat message
+./chat.js: * @apiDescription A message will be hidden from chat if two or more users flag a message.
+./chat.js- * It will be hidden immediately if a moderator flags the message.
+./chat.js- * An email is sent to the moderators about every flagged message.
+./chat.js: * @apiName FlagChat
+./chat.js- * @apiGroup Chat
+./chat.js- *
+./chat.js: * @apiParam (Path) {UUID} groupId The group id ('party' for the user party and 'habitrpg'
+./chat.js- *                                 for tavern are accepted)
+./chat.js: * @apiParam (Path) {UUID} chatId The chat message id
+./chat.js: * @apiParam (Body) {String} [comment] explain why the message was flagged
+./chat.js- *
+./chat.js- * @apiSuccess {Object} data The flagged chat message
+./chat.js- * @apiSuccess {UUID} data.id The id of the message
+./chat.js- * @apiSuccess {String} data.text The text of the message
+./chat.js- * @apiSuccess {Number} data.timestamp The timestamp of the message in milliseconds
+--
+./chat.js-    res.respond(200, message);
+./chat.js-  },
+./chat.js-};
+./chat.js-
+./chat.js-/**
+./chat.js: * @api {post} /api/v3/groups/:groupId/chat/:chatId/clearflags Clear flags
+./chat.js: * @apiDescription Resets the flag count on a chat message.
+./chat.js- * Retains the id of the user's that have flagged the message. (Only visible to moderators)
+./chat.js- * @apiPermission Admin
+./chat.js: * @apiName ClearFlags
+./chat.js- * @apiGroup Chat
+./chat.js- *
+./chat.js: * @apiParam (Path) {UUID} groupId The group id ('party' for the user party and 'habitrpg'
+./chat.js- *                                 for tavern are accepted)
+./chat.js: * @apiParam (Path) {UUID} chatId The chat message id
+./chat.js- *
+./chat.js- * @apiSuccess {Object} data An empty object
+./chat.js- *
+./chat.js- * @apiUse GroupNotFound
+./chat.js- * @apiUse MessageNotFound
+--
+./chat.js-    res.respond(200, {});
+./chat.js-  },
+./chat.js-};
+./chat.js-
+./chat.js-/**
+./chat.js: * @api {post} /api/v3/groups/:groupId/chat/seen Mark all messages as read for a group
+./chat.js: * @apiName SeenChat
+./chat.js- * @apiGroup Chat
+./chat.js- *
+./chat.js: * @apiParam (Path) {UUID} groupId The group _id ('party' for the user party and 'habitrpg'
+./chat.js- *                                 for tavern are accepted)
+./chat.js- *
+./chat.js- * @apiSuccess {Object} data An empty object
+./chat.js- * @apiUse GroupIdRequired
+./chat.js- */
+--
+./chat.js-    res.respond(200, {});
+./chat.js-  },
+./chat.js-};
+./chat.js-
+./chat.js-/**
+./chat.js: * @api {delete} /api/v3/groups/:groupId/chat/:chatId Delete chat message from a group
+./chat.js: * @apiName DeleteChat
+./chat.js- * @apiGroup Chat
+./chat.js: * @apiDescription Delete's a chat message from a group
+./chat.js- *
+./chat.js: * @apiParam (Query) {UUID} previousMsg The last message's ID fetched by the
+./chat.js- *                                      client so that the whole chat will be returned only
+./chat.js- *                                      if new messages have been posted in the meantime.
+./chat.js: * @apiParam (Path) {UUID} groupId The group _id ('party' for the user party and 'habitrpg'
+./chat.js- *                                 for tavern are accepted).
+./chat.js: * @apiParam (Path) {UUID} chatId The chat message id
+./chat.js- *
+./chat.js- * @apiSuccess data The updated chat array or an empty object if no message was posted
+./chat.js- *                  after previousMsg.
+./chat.js- * @apiSuccess {Object} data An empty object when the previous message was deleted
+./chat.js- *
+--
+./pushNotifications.js-
+./pushNotifications.js-const api = {};
+./pushNotifications.js-
+./pushNotifications.js-/**
+./pushNotifications.js- * @apiIgnore
+./pushNotifications.js: * @api {post} /api/v3/user/push-devices Add a push device to a user
+./pushNotifications.js: * @apiName UserAddPushDevice
+./pushNotifications.js- * @apiGroup User
+./pushNotifications.js- *
+./pushNotifications.js: * @apiParam (Body) {String} regId The id of the push device
+./pushNotifications.js: * @apiParam (Body) {String} type The type of push device
+./pushNotifications.js- *
+./pushNotifications.js- * @apiSuccess {Object} data List of push devices
+./pushNotifications.js- * @apiSuccess {String} message Success message
+./pushNotifications.js- */
+./pushNotifications.js-api.addPushDevice = {
+--
+./pushNotifications.js-  },
+./pushNotifications.js-};
+./pushNotifications.js-
+./pushNotifications.js-/**
+./pushNotifications.js- * @apiIgnore
+./pushNotifications.js: * @api {delete} /api/v3/user/push-devices/:regId remove a push device from a user
+./pushNotifications.js: * @apiName UserRemovePushDevice
+./pushNotifications.js- * @apiGroup User
+./pushNotifications.js- *
+./pushNotifications.js: * @apiParam (Path) {String} regId The id of the push device
+./pushNotifications.js- *
+./pushNotifications.js- * @apiSuccess {Object} data List of push devices
+./pushNotifications.js- * @apiSuccess {String} message Success message
+./pushNotifications.js- */
+./pushNotifications.js-api.removePushDevice = {
+--
+./modelsPaths.js-
+./modelsPaths.js-const tasksModels = ['habit', 'daily', 'todo', 'reward'];
+./modelsPaths.js-const allModels = ['user', 'tag', 'challenge', 'group'].concat(tasksModels);
+./modelsPaths.js-
+./modelsPaths.js-/**
+./modelsPaths.js: * @api {get} /api/v3/models/:model/paths Get all paths for the specified model
+./modelsPaths.js: * @apiDescription Doesn't require authentication
+./modelsPaths.js: * @apiName GetUserModelPaths
+./modelsPaths.js- * @apiGroup Meta
+./modelsPaths.js- *
+./modelsPaths.js: * @apiParam (Path) {String="user","group","challenge","tag","habit",
+./modelsPaths.js-                    "daily","todo","reward"} model The name of the model
+./modelsPaths.js- *
+./modelsPaths.js- * @apiExample {curl} Tag
+./modelsPaths.js- * curl https://habitica.com/api/v3/models/tag/paths
+./modelsPaths.js- *
+--
+./i18n.js-const IS_PROD = nconf.get('IS_PROD');
+./i18n.js-
+./i18n.js-const api = {};
+./i18n.js-
+./i18n.js-/**
+./i18n.js: * @api {get} /api/v3/i18n/browser-script Returns the i18n JS script.
+./i18n.js: * @apiDescription Returns the i18n JS script to make
+./i18n.js- * all the i18n strings available in the browser under window.i18n.strings.
+./i18n.js- * Does not require authentication.
+./i18n.js: * @apiName i18nBrowserScriptGet
+./i18n.js- * @apiGroup i18n
+./i18n.js- */
+./i18n.js-api.geti18nBrowserScript = {
+./i18n.js-  method: 'GET',
+./i18n.js-  url: '/i18n/browser-script',
+--
+./notifications.js-} from '../../models/user';
+./notifications.js-
+./notifications.js-const api = {};
+./notifications.js-
+./notifications.js-/**
+./notifications.js: * @api {post} /api/v3/notifications/:notificationId/read Mark one notification as read
+./notifications.js: * @apiName ReadNotification
+./notifications.js- * @apiGroup Notification
+./notifications.js- *
+./notifications.js: * @apiParam (Path) {UUID} notificationId
+./notifications.js- *
+./notifications.js- * @apiSuccess {Object} data user.notifications
+./notifications.js- */
+./notifications.js-api.readNotification = {
+./notifications.js-  method: 'POST',
+--
+./notifications.js-    res.respond(200, user.notifications);
+./notifications.js-  },
+./notifications.js-};
+./notifications.js-
+./notifications.js-/**
+./notifications.js: * @api {post} /api/v3/notifications/read Mark multiple notifications as read
+./notifications.js: * @apiName ReadNotifications
+./notifications.js- * @apiGroup Notification
+./notifications.js- *
+./notifications.js- * @apiSuccess {Object} data user.notifications
+./notifications.js- */
+./notifications.js-api.readNotifications = {
+--
+./notifications.js-    res.respond(200, user.notifications);
+./notifications.js-  },
+./notifications.js-};
+./notifications.js-
+./notifications.js-/**
+./notifications.js: * @api {post} /api/v3/notifications/:notificationId/see Mark one notification as seen
+./notifications.js: * @apiDescription Mark a notification as seen.
+./notifications.js- * Different from marking them as read in that the notification isn't
+./notifications.js- * removed but the `seen` field is set to `true`.
+./notifications.js: * @apiName SeeNotification
+./notifications.js- * @apiGroup Notification
+./notifications.js- *
+./notifications.js: * @apiParam (Path) {UUID} notificationId
+./notifications.js- *
+./notifications.js- * @apiSuccess {Object} data The modified notification
+./notifications.js- */
+./notifications.js-api.seeNotification = {
+./notifications.js-  method: 'POST',
+--
+./notifications.js-    res.respond(200, notification);
+./notifications.js-  },
+./notifications.js-};
+./notifications.js-
+./notifications.js-/**
+./notifications.js: * @api {post} /api/v3/notifications/see Mark multiple notifications as seen
+./notifications.js: * @apiName SeeNotifications
+./notifications.js- * @apiGroup Notification
+./notifications.js- *
+./notifications.js- * @apiSuccess {Object} data user.notifications
+./notifications.js- */
+./notifications.js-api.seeNotifications = {
+--
+./inbox.js-const api = {};
+./inbox.js-
+./inbox.js-/* NOTE most inbox routes are either in the user or members controller */
+./inbox.js-
+./inbox.js-/**
+./inbox.js: * @api {get} /api/v3/inbox/messages Get inbox messages for a user
+./inbox.js: * @apiName GetInboxMessages
+./inbox.js- * @apiGroup Inbox
+./inbox.js: * @apiDescription Get inbox messages for a user
+./inbox.js- *
+./inbox.js: * @apiParam (Query) {Number} page Load the messages of the selected Page - 10 Messages per Page
+./inbox.js: * @apiParam (Query) {GUID} conversation Loads only the messages of a conversation
+./inbox.js- *
+./inbox.js- * @apiSuccess {Array} data An array of inbox messages
+./inbox.js- */
+./inbox.js-api.getInboxMessages = {
+./inbox.js-  method: 'GET',
+--
+./debug.js- */
+./debug.js-
+./debug.js-const api = {};
+./debug.js-
+./debug.js-/**
+./debug.js: * @api {post} /api/v3/debug/add-ten-gems Add ten gems to the current user
+./debug.js: * @apiName AddTenGems
+./debug.js- * @apiGroup Development
+./debug.js- * @apiPermission Developers
+./debug.js- *
+./debug.js- * @apiSuccess {Object} data An empty Object
+./debug.js- */
+--
+./debug.js-    res.respond(200, {});
+./debug.js-  },
+./debug.js-};
+./debug.js-
+./debug.js-/**
+./debug.js: * @api {post} /api/v3/debug/add-hourglass Add Hourglass to the current user
+./debug.js: * @apiName AddHourglass
+./debug.js- * @apiGroup Development
+./debug.js- * @apiPermission Developers
+./debug.js- *
+./debug.js- * @apiSuccess {Object} data An empty Object
+./debug.js- */
+--
+./debug.js-    res.respond(200, {});
+./debug.js-  },
+./debug.js-};
+./debug.js-
+./debug.js-/**
+./debug.js: * @api {post} /api/v3/debug/set-cron Set lastCron for user
+./debug.js: * @apiName setCron
+./debug.js- * @apiGroup Development
+./debug.js- * @apiPermission Developers
+./debug.js- *
+./debug.js- * @apiSuccess {Object} data An empty Object
+./debug.js- */
+--
+./debug.js-    res.respond(200, {});
+./debug.js-  },
+./debug.js-};
+./debug.js-
+./debug.js-/**
+./debug.js: * @api {post} /api/v3/debug/make-admin Sets admin privileges for current user
+./debug.js: * @apiName setCron
+./debug.js- * @apiGroup Development
+./debug.js- * @apiPermission Developers
+./debug.js- *
+./debug.js- * @apiSuccess {Object} data An empty Object
+./debug.js- */
+--
+./debug.js-    res.respond(200, {});
+./debug.js-  },
+./debug.js-};
+./debug.js-
+./debug.js-/**
+./debug.js: * @api {post} /api/v3/debug/modify-inventory Manipulate user's inventory
+./debug.js: * @apiName modifyInventory
+./debug.js- * @apiGroup Development
+./debug.js- * @apiPermission Developers
+./debug.js- *
+./debug.js: * @apiParam (Body) {Object} gear Object to replace user's <code><a href="https://github.com/HabitRPG/habitica/blob/develop/website/server/models/user/schema.js#L243">gear.owned</a></code> object.
+./debug.js: * @apiParam (Body) {Object} special Object to replace user's <code><a href="https://github.com/HabitRPG/habitica/blob/develop/website/server/models/user/schema.js#272">special</a></code> object.
+./debug.js: * @apiParam (Body) {Object} pets Object to replace user's <code><a href="https://github.com/HabitRPG/habitica/blob/develop/website/server/models/user/schema.js#296">pets</a></code> object.
+./debug.js: * @apiParam (Body) {Object} mounts Object to replace user's <code><a href="https://github.com/HabitRPG/habitica/blob/develop/website/server/models/user/schema.js#329">mounts</a></code> object.
+./debug.js: * @apiParam (Body) {Object} eggs Object to replace user's <code><a href="https://github.com/HabitRPG/habitica/blob/develop/website/server/models/user/schema.js#310">eggs</a></code> object.
+./debug.js: * @apiParam (Body) {Object} hatchingPotions Object to replace user's <code><a href="https://github.com/HabitRPG/habitica/blob/develop/website/server/models/user/schema.js#316">hatchingPotions</a></code> object.
+./debug.js: * @apiParam (Body) {Object} food Object to replace user's <code><a href="https://github.com/HabitRPG/habitica/blob/develop/website/server/models/user/schema.js#322">food</a></code> object.
+./debug.js: * @apiParam (Body) {Object} quests Object to replace user's <code><a href="https://github.com/HabitRPG/habitica/blob/develop/website/server/models/user/schema.js#344">quests</a></code> object.
+./debug.js- * @apiSuccess {Object} data An empty Object
+./debug.js- */
+./debug.js-api.modifyInventory = {
+./debug.js-  method: 'POST',
+./debug.js-  url: '/debug/modify-inventory',
+--
+./debug.js-    res.respond(200, {});
+./debug.js-  },
+./debug.js-};
+./debug.js-
+./debug.js-/**
+./debug.js: * @api {post} /api/v3/debug/quest-progress Artificially accelerate quest progress
+./debug.js: * @apiName questProgress
+./debug.js- * @apiGroup Development
+./debug.js- * @apiPermission Developers
+./debug.js- *
+./debug.js- * @apiSuccess {Object} data An empty Object
+./debug.js- */
