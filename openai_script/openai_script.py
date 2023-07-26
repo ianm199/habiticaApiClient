@@ -9,7 +9,61 @@ LARGE_WINDOW_GPT3 = "gpt-3.5-turbo-16k"
 GPT_4 = "gpt-4"
 LARGE_WINDOW_GPT4 = "gpt-4-32k"
 
-def create_main_api_client(threaded: bool = False):
+def create_api_client_tests(threaded: bool = False) -> None:
+    prompt = """
+    Only responde with code as plain text, without code block syntax around it. Include the relevant import statements,
+    Include no other text in your response. Your job is to look at sections of the HabiticaAPIClient and create test cases
+    for them. In situations where your asked for an "id" fo some sort like task_id, but you don't understand what to do, 
+    leave a comment indicating that. Use thios test file for reference:
+    ```
+    import os
+import unittest
+from src.tasks import HabiticaTaskClient
+
+class TestHabiticaTaskClient(unittest.TestCase):
+
+    def setUp(self):
+        api_key = os.getenv('HABITICA_TEST_API_KEY')
+        user_id = os.getenv('HABITICA_TEST_USER_ID')
+        self.task_client = HabiticaTaskClient(user_id, api_key)
+        self.dummy_task = self.task_client.create_user_task("Dummy Data", task_type="todo")
+
+    def test_get_user_tasks(self):
+        response = self.task_client.get_user_tasks()
+        self.assertTrue(response, list)
+
+    def test_create_user_task(self):
+        daily_user_task = self.task_client.create_user_task("Example daily", task_type="todo")
+        self.assertEqual(daily_user_task['text'],"Example daily")
+        self.assertEqual(daily_user_task['type'],"todo")
+
+    def test_add_checklist_item_and_score_update(self):
+        checklist_item = self.task_client.add_checklist_item(task_id=self.dummy_task['id'], text="test checklist", completed="false")
+        self.assertTrue(checklist_item['checklist'][0]['text'], "test checklist")
+        score_checklist = self.task_client.score_checklist_item(task_id=self.dummy_task['id'], item_id=checklist_item['checklist'][0]['id'])
+        self.assertIsInstance(score_checklist, dict)
+        update_checklist_item = self.task_client.update_checklist_item(self.dummy_task['id'], checklist_item['checklist'][0]['id'], text="update", completed=False)
+        self.assertEqual(update_checklist_item['checklist'][0]['text'], "update")
+    ```
+    Here is the file you are making tests for:
+    {}
+    """
+    path_to_test_folder = "../tests"
+    path_to_src_files = "../src"
+    if threaded:
+        with ProcessPoolExecutor() as processor:
+            for file in os.listdir(path_to_src_files):
+                file_object = file.split("/")[-1].rstrip(".py")
+                file_contents = str(open(file).read())
+                processor.submit(write_client_file, file_object, "../test", file_contents, prompt, DEFAULT_MODEL)
+    else:
+        for file in os.listdir(path_to_src_files):
+            file_object = file.rstrip(".py")
+            file_contents = str(open(os.path.join(path_to_src_files, file)).read())
+            write_client_file(file_object, "../test", file_contents, prompt, DEFAULT_MODEL)
+
+
+def create_main_api_client(threaded: bool = False) -> None:
     api_schema_dict = get_content_dict("apiSchema.txt")
     prompt = """
     Only respond with code as plain text, without code block syntax around it. Include the relevant import statements.
@@ -80,10 +134,10 @@ def create_main_api_client(threaded: bool = False):
     if threaded:
         with ProcessPoolExecutor() as processor:
             for object_type, api_docs in api_schema_dict.items():
-                processor.submit(write_client_file, object_type, api_docs, prompt)
+                processor.submit(write_client_file, object_type, "../src", api_docs, prompt)
     else:
         for object_type, api_docs in api_schema_dict.items():
-            write_client_file(object_type, api_docs, prompt)
+            write_client_file(object_type, "../src",  api_docs, prompt)
 
 def get_content_dict(schema_file_path: str) -> dict:
     """
@@ -107,10 +161,10 @@ def get_content_dict(schema_file_path: str) -> dict:
 
     return result
 
-def write_client_file(object_type: str, object_data: str, prompt: str, gpt_model = GPT_4) -> None:
-    file_path = f"../src/{object_type}.py"
-    if os.path.exists(file_path):
-        print(f"Skipping {file_path} because it already exists")
+def write_client_file(object_type: str, file_path: str, object_data: str, prompt: str, gpt_model = GPT_4) -> None:
+    full_file_path = os.path.join(file_path, f"{object_type}.py")
+    if os.path.exists(full_file_path):
+        print(f"Skipping {full_file_path} because it already exists")
         return
     full_prompt = prompt.format(object_data)
     token_estimate = len(full_prompt) // 4
@@ -118,10 +172,11 @@ def write_client_file(object_type: str, object_data: str, prompt: str, gpt_model
         gpt_model = LARGE_WINDOW_GPT4
     openai_call = openai.ChatCompletion.create(model=gpt_model, messages=[{"role": "user", "content": full_prompt}])
     openai_output = Output.init_from_json(json_dict=openai_call)
-    with open(f"../src/{object_type}.py", 'w') as f:
+    with open(full_file_path, 'w') as f:
         f.write(openai_output.choices[0].message.content)
-    print(f"Wrote file: {file_path}")
+    print(f"Wrote file: {full_file_path}")
 
 
 if __name__ == '__main__':
-    create_main_api_client(threaded=True)
+    # create_main_api_client(threaded=True)
+    create_api_client_tests(False)
