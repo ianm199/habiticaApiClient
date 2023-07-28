@@ -11,10 +11,12 @@ LARGE_WINDOW_GPT4 = "gpt-4-32k"
 
 def create_api_client_tests(threaded: bool = False) -> None:
     prompt = """
-    Only responde with code as plain text, without code block syntax around it. Include the relevant import statements,
+    Only respond with code as plain text, without code block syntax around it. Include the relevant import statements,
     Include no other text in your response. Your job is to look at sections of the HabiticaAPIClient and create test cases
     for them. In situations where your asked for an "id" fo some sort like task_id, but you don't understand what to do, 
-    leave a comment indicating that. Use thios test file for reference:
+    leave a comment indicating that. Use this test file for reference. But you must consider, these tests MUST use mocks
+    entirely, they should not be calling the open internet at all. So you should just be checking that they will call the 
+    data as expected. Use unittest.mocks as you see fit:
     ```
     import os
 import unittest
@@ -53,14 +55,16 @@ class TestHabiticaTaskClient(unittest.TestCase):
     if threaded:
         with ProcessPoolExecutor() as processor:
             for file in os.listdir(path_to_src_files):
+                if os.path.isdir(os.path.join(path_to_src_files, file)):
+                    continue
                 file_object = file.split("/")[-1].rstrip(".py")
-                file_contents = str(open(file).read())
+                file_contents = str(open(os.path.join(path_to_src_files, file)).read())
                 processor.submit(write_client_file, file_object, "../test", file_contents, prompt, DEFAULT_MODEL)
     else:
         for file in os.listdir(path_to_src_files):
             file_object = file.rstrip(".py")
             file_contents = str(open(os.path.join(path_to_src_files, file)).read())
-            write_client_file(file_object, "../test", file_contents, prompt, DEFAULT_MODEL)
+            write_client_file(file_object, file_object, "../test", file_contents, prompt, DEFAULT_MODEL)
 
 
 def create_main_api_client(threaded: bool = False) -> None:
@@ -70,7 +74,7 @@ def create_main_api_client(threaded: bool = False) -> None:
      Include no other text in your response. Your job is to 
     look at these endpoint schemas from the Habitica open source project and create a Python class Habitica<ObjectType>Client
     where <ObjectType> is the type of objcet. I.e. for tasks it is HabiticaTaskClient, for challenge, it is HabiticaChallengeClient 
-    that extends the Habitica base class HabiticaBaseClient. Import it with from client import HabiticaBaseClient. These schema are in ApiDoc format.
+    that extends the Habitica base class HabiticaBaseClient. Import it with from src.client import HabiticaBaseClient. These schema are in ApiDoc format.
     Schema:
     {}
     HabiticaBaseClient for reference:
@@ -179,4 +183,4 @@ def write_client_file(object_type: str, file_path: str, object_data: str, prompt
 
 if __name__ == '__main__':
     # create_main_api_client(threaded=True)
-    create_api_client_tests(False)
+    create_api_client_tests(True)

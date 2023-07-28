@@ -1,6 +1,7 @@
-from client import HabiticaBaseClient
+from typing import Dict
+from src.client import HabiticaBaseClient
 
-class HabiticaUserClient(HabiticaBaseClient):
+class HabiticaSpellClient(HabiticaBaseClient):
     def cast_spell(self, spellId: str, targetId: str = None) -> Dict:
         params = {}
         if targetId:

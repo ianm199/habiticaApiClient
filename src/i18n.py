@@ -1,4 +1,4 @@
-from client import HabiticaBaseClient
+from src.client import HabiticaBaseClient
 
 class HabiticaI18nClient(HabiticaBaseClient):
     def get_i18n_browser_script(self) -> dict:

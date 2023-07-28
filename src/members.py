@@ -1,5 +1,5 @@
 from typing import Optional, Dict
-from client import HabiticaBaseClient
+from src.client import HabiticaBaseClient
 import requests
 
 class HabiticaMemberClient(HabiticaBaseClient):

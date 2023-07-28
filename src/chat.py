@@ -1,6 +1,6 @@
 from typing import Optional, Dict
 import requests
-from client import HabiticaBaseClient
+from src.client import HabiticaBaseClient
 
 class HabiticaChatClient(HabiticaBaseClient):
     def get_group_chat_messages(self, groupId: str) -> Dict:

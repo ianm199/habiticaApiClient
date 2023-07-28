@@ -1,42 +1,47 @@
 import unittest
+from unittest.mock import Mock
 from src.client import HabiticaBaseClient
 from src.tags import HabiticaTagClient
 
 class TestHabiticaTagClient(unittest.TestCase):
 
     def setUp(self):
-        api_key = os.getenv('HABITICA_TEST_API_KEY')
-        user_id = os.getenv('HABITICA_TEST_USER_ID')
-        self.tag_client = HabiticaTagClient(user_id, api_key)
+        user_id = '123'
+        api_key = '456'
+        self.client = HabiticaTagClient(user_id, api_key)
+        self.client.make_request = Mock()
+        self.client.make_request.return_value = {}
 
     def test_create_tag(self):
-        response = self.tag_client.create_tag("Example Tag")
-        self.assertEqual(response['name'], "Example Tag")
+        tag_name = 'some_tag_name'
+        self.client.create_tag(tag_name)
+        self.client.make_request.assert_called_once_with('POST', '/tags', data={'name': tag_name})
 
     def test_get_user_tags(self):
-        response = self.tag_client.get_user_tags()
-        self.assertTrue(response, list)
+        self.client.get_user_tags()
+        self.client.make_request.assert_called_once_with('GET', '/tags')
 
     def test_get_a_tag(self):
-        # Replace <tag_id> with an actual tag ID from the user's account
-        tag_id = "<tag_id>"
-        response = self.tag_client.get_a_tag(tag_id)
-        self.assertEqual(response['id'], tag_id)
+        tag_id = 'some_tag_id'
+        self.client.get_a_tag(tag_id)
+        self.client.make_request.assert_called_once_with('GET', f'/tags/{tag_id}')
 
     def test_update_a_tag(self):
-        # Replace <tag_id> with an actual tag ID from the user's account
-        tag_id = "<tag_id>"
-        response = self.tag_client.update_a_tag(tag_id, "Updated Tag Name")
-        self.assertEqual(response['name'], "Updated Tag Name")
+        tag_id = 'some_tag_id'
+        tag_name = 'some_tag_name'
+        self.client.update_a_tag(tag_id, tag_name)
+        self.client.make_request.assert_called_once_with('PUT', f'/tags/{tag_id}', data={'name': tag_name})
 
     def test_reorder_tags(self):
-        # Replace <tag_id> with an actual tag ID from the user's account
-        tag_id = "<tag_id>"
-        response = self.tag_client.reorder_tags(tag_id, 2)
-        self.assertTrue(response, dict)
+        tag_id = 'some_tag_id'
+        position = 3
+        self.client.reorder_tags(tag_id, position)
+        self.client.make_request.assert_called_once_with('POST', '/reorder-tags', data={'tagId': tag_id, 'to': position})
 
     def test_delete_a_tag(self):
-        # Replace <tag_id> with an actual tag ID from the user's account
-        tag_id = "<tag_id>"
-        response = self.tag_client.delete_a_tag(tag_id)
-        self.assertEqual(response['success'], True)
+        tag_id = 'some_tag_id'
+        self.client.delete_a_tag(tag_id)
+        self.client.make_request.assert_called_once_with('DELETE', f'/tags/{tag_id}')
+
+if __name__ == '__main__':
+    unittest.main()

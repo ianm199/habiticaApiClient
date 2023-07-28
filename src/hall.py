@@ -1,6 +1,6 @@
 from typing import Optional, Dict
 import requests
-from client import HabiticaBaseClient
+from src.client import HabiticaBaseClient
 
 class HabiticaHallClient(HabiticaBaseClient):
     def get_all_patrons(self, page: int = 0) -> Dict:

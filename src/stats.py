@@ -1,7 +1,7 @@
-from client import Dict
-from client import HabiticaBaseClient
+from typing import Dict
+from src.client import HabiticaBaseClient
 
-class HabiticaUserClient(HabiticaBaseClient):
+class HabiticaStatsClient(HabiticaBaseClient):
     def user_allocate(self, stat: str = 'str') -> Dict:
         return self.make_request('POST', '/api/v3/user/allocate', params={'stat': stat})
 

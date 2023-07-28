@@ -1,4 +1,4 @@
-from client import HabiticaBaseClient
+from src.client import HabiticaBaseClient
 
 class HabiticaNotificationClient(HabiticaBaseClient):
     def mark_notification_as_read(self, notification_id: str) -> dict:

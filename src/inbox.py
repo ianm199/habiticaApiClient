@@ -1,4 +1,4 @@
-from client import HabiticaBaseClient
+from src.client import HabiticaBaseClient
 
 class HabiticaInboxClient(HabiticaBaseClient):
     def get_inbox_messages(self, page: int = None, conversation: str = None) -> dict:

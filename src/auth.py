@@ -1,4 +1,4 @@
-from client import HabiticaBaseClient
+from src.client import HabiticaBaseClient
 import requests
 
 class HabiticaUserClient(HabiticaBaseClient):

@@ -1,5 +1,5 @@
 from typing import Dict
-from client import HabiticaBaseClient
+from src.client import HabiticaBaseClient
 
 class HabiticaDevelopmentClient(HabiticaBaseClient):
     def add_ten_gems(self) -> Dict:

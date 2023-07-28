@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 import requests
-from client import HabiticaBaseClient
+from src.client import HabiticaBaseClient
 
 class HabiticaQuestClient(HabiticaBaseClient):
     def invite_users_to_quest(self, groupId: str, questKey: str) -> Dict:

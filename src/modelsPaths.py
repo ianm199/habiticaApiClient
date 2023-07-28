@@ -1,4 +1,4 @@
-from client import HabiticaBaseClient
+from src.client import HabiticaBaseClient
 
 class HabiticaUserClient(HabiticaBaseClient):
     def get_model_paths(self, model: str):

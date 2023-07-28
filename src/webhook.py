@@ -1,5 +1,5 @@
 from typing import Optional, Dict
-from client import HabiticaBaseClient
+from src.client import HabiticaBaseClient
 
 class HabiticaWebhookClient(HabiticaBaseClient):
     def create_webhook(self, url: str, id: Optional[str] = None, label: Optional[str] = None,

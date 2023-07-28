@@ -1,15 +1,24 @@
-from typing import Dict
-from client import HabiticaBaseClient
+import unittest
+from unittest.mock import Mock
+from src.cron import HabiticaCronClient
 
-class HabiticaCronClient(HabiticaBaseClient):
+class TestHabiticaCronClient(unittest.TestCase):
 
-    def run_cron(self, data: Dict) -> dict:
-        return self.make_request('POST', '/cron', data=data)
+    def setUp(self):
+        self.cron_client = HabiticaCronClient("user", "apikey")
+        self.mock_make_request = Mock()
+        self.cron_client.make_request = self.mock_make_request
 
-# Test cases for HabiticaCronClient
+    def test_run_cron(self):
+        data = {'key': 'value'}
+        expected_response = {'response': 'data'}
+        self.mock_make_request.return_value = expected_response
+        
+        response = self.cron_client.run_cron(data)
+        
+        self.assertEqual(response, expected_response)
+        self.mock_make_request.assert_called_once_with('POST', '/cron', data=data)
 
-# Test run_cron method
-habitica_cron_client = HabiticaCronClient(user_id, api_key)
-data = {"param1": "value1", "param2": "value2"}
-response = habitica_cron_client.run_cron(data)
-assert response['success'] == True
+
+if __name__ == '__main__':
+    unittest.main()

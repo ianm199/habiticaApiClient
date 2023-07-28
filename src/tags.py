@@ -1,4 +1,4 @@
-from client import HabiticaBaseClient
+from src.client import HabiticaBaseClient
 from typing import Dict
 
 class HabiticaTagClient(HabiticaBaseClient):
