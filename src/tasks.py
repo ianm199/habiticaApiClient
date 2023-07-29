@@ -3,7 +3,7 @@ from src.client import HabiticaBaseClient
 
 
 class HabiticaTaskClient(HabiticaBaseClient):
-    def get_user_tasks(self, task_type: str = None, due_date: str = None) -> Dict:
+    def get_user_tasks(self, task_type: str = None, due_date: str = None) -> List[Dict]:
         params = {}
         if task_type:
             params['type'] = task_type

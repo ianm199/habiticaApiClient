@@ -1,5 +1,5 @@
 import requests
-from typing import Dict, Optional
+from typing import Dict, Optional, Union, List, Any
 
 class HabiticaBaseClient:
     def __init__(self, api_user: str, api_key: str, base_url: str = 'https://habitica.com/api/v3'):
@@ -7,7 +7,7 @@ class HabiticaBaseClient:
         self.api_key = api_key
         self.base_url = base_url
 
-    def make_request(self, method: str, endpoint: str, params: Optional[dict] = None, data: Optional[dict] = None) -> Dict:
+    def make_request(self, method: str, endpoint: str, params: Optional[dict] = None, data: Optional[dict] = None) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
         url = f"{self.base_url}{endpoint}"
         headers = {'x-api-user': self.api_user, 'x-api-key': self.api_key}
         if data:
