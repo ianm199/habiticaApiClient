@@ -6,7 +6,7 @@ from src.chat import HabiticaChatClient, HabiticaBaseClient
 class TestHabiticaChatClient(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.client = HabiticaChatClient(os.environ['HABITICA_TEST_USER_ID'], os.environ['HABITICA_TEST_API_KEY'])
+        cls.client = HabiticaChatClient(os.environ.get('HABITICA_TEST_USER_ID'), os.environ.get('HABITICA_TEST_API_KEY'))
 
     @patch.object(HabiticaBaseClient, 'make_request', return_value={"messages": []})
     def test_get_group_chat_messages(self, mock_make_request):
