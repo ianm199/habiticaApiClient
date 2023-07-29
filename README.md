@@ -3,8 +3,19 @@ This project is an API Client for interacting with the Habitica API. I thought i
 user base tends to be interested in automation anyway. The client is broken down into many sub clients based on the object
 type that the user is interacting with. It follows the main pattern of the [Habitica API](https://habitica.com/apidoc/).
 
+### Install
+Can be installed from pypi with pip:
+```commandline
+pip install habiticaApiClient
+```
+Or can be installed from github: 
+```commandline
+pip install git+https://github.com/ianm199/habiticaApiClient.git
+```
+
 ### Usage
 Example getting list of tasks for your user:
+
 ```python
 import os
 from src.tasks import HabiticaTaskClient
